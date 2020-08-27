@@ -1,0 +1,27 @@
+{
+    "num_row":10,
+    "num_col":10,
+    "init_infected":5,
+    "population":100,
+    "age_dist": {
+        "24":0.399,
+        "44":0.293,
+        "64":0.186,
+        "84":0.122
+    },
+    "age_dist_disease": {
+        "24":0.00203,
+        "44":0.0274,
+        "64":0.178,
+        "84":0.79257
+    },
+    "latent_period_min":4,
+    "latent_period_max":6,
+    "infectious_period_min":2,
+    "infectious_period_max":14,
+    "max_exposure": 15,
+    "mask_wearer": 0.84,
+    "separator": 0.50,
+    "symptomatic": 0.60,
+    "vonNeumann": true
+}
