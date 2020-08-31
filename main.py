@@ -51,29 +51,68 @@ class Individual:
         print("Chance of dying:", self.mortality*100, '%')
         print('\n')
 
+    # assess the individual's state of health and determine if they progress through the disease
+    # This means susceptible individuals will have their surroundings analyzed for number of infectious
+    #       individuals, latent individuals will be checked if they transition to the infectious stage,
+    #       as well as infectious individuals to the recovered stage.
+    #       NOTE: the individual's member variables are not updated at this time to prevent read-after-write hazards
+    #       i.e. individuals' changes to their state of health in one day do not affect their neighbors until the following
+    #       day. For example, an individual transitioned to the infectious stage in day 100. If we went ahead and updated
+    #       their object variables, their susceptible neighbor being analyzed next in the simulation will be influenced
+    #       by that change. Since changes don't take affect until the next day, we just flag the individual for changes and
+    #       update the variables after all individuals in the simulation have been analyzed.
     def flag_for_update(self, num_surrounded):
+        """
+        Assess the individual's state of health and determine if they progress through the disease
+            This means susceptible individuals will have their surroundings analyzed for number of infectious
+              individuals, latent individuals will be checked if they transition to the infectious stage,
+              as well as infectious individuals to the recovered stage.
+                NOTE: the individual's member variables are not updated at this time because individuals' changes to their state
+                of health in one day do not affect their neighbors until the following day. For example, an individual transitioned
+                to the infectious stage in day 100. If we went ahead and updated their object variables, their susceptible neighbor
+                being analyzed next in the simulation will be influenced by that change. Since changes don't take affect
+                until the next day, we just flag the individual for changes and update the variables after all individuals
+                in the simulation have been analyzed.
+        """
+        # add one day to the individual's time in their current state
         self.days_in_state += 1
+        # if they're susceptible, add the number of infectious individuals in their neighborhood to their
+        #       exposure point count
         if self.state_of_health == 0:
             self.check_if_latent(num_surrounded)
+        # if they're in the latent stage, check if they have stayed the latent period or not
         elif self.state_of_health == 1:
             self.check_if_infectious()
+        # if infectious, check if they have stayed the infectious period or not
         elif self.state_of_health == 2:
             self.check_if_removed()
 
     def check_if_latent(self, num_surrounded):
+        """
+        checks if the individual has had enough exposures to become infected and join the latent stage
+        """
         self.exposure_points += num_surrounded
         if self.exposure_points >= MAX_EXPOSURE:
             self.change = True
 
     def check_if_infectious(self):
+        """
+        checks if the individual has stayed the duration of the latent period to become infectious
+        """
         if self.days_in_state == self.days_in_latent:
             self.change = True
     
     def check_if_removed(self):
+        """
+        checks if the individual has stayed the duration of the infectious period to become removed (dead or alive)
+        """
         if self.days_in_state == self.days_in_infectious:
             self.change = True
 
     def apply_changes(self, spot):
+        """
+        updates the state variables of the individual
+        """
         if not self.updated:
             if self.change:
                 self.days_in_state = 0
@@ -81,9 +120,16 @@ class Individual:
                 self.change = False
             if spot != self.tendency:
                 self.select_new_location(spot)
+            else:
+                # changes the individual `self.tendency` to be a new location in the simulation grid
+                self.tendency = (random.randint(1, NUM_ROWS-2), random.randint(1, NUM_COLS-2))
+            # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
     
     def select_new_location(self, spot):
+        """
+        moves the individual in the simulation grid
+        """
         new_spot_row = 0
         new_spot_col = 0
         drow = spot[0] - self.tendency[0]
@@ -98,9 +144,6 @@ class Individual:
             new_spot_col = spot[1] - 1
         self.location = (new_spot_row, new_spot_col)
 
-
-
-
 ##############################################################################################################
 #                                               CONSTANTS
 ##############################################################################################################
@@ -108,8 +151,7 @@ class Individual:
 # grab the parameters file from the command line
 PARAMS = {}
 with open(sys.argv[1], 'r') as f:
-    data = f.read()
-    PARAMS = json.loads(data)
+    PARAMS = json.loads(f.read())
 
 # constants pertaining to the simulation, such as
 #       grid dimensions
@@ -209,51 +251,34 @@ def main():
         # main simulation block
         # open a 'csv' file for outputting the daily reports, explained later
         with open("CAoutput.csv", 'w') as outfile:
+            # output the csv file headers
             outfile.write("day,susceptible,latent,infectious,recovered\n")
+            # length of simulation in days
             num_days = 0
             # loop until there are no individuals in the infectious nor latent stages
             while num_infectious or num_latent:
-                # this variable keeps our for loops from interating over a border element.
-                # Remember that our grid is surrounded by a layer of zeros so we don't get
-                #       out-of-bounds errors when checking a cell's neighbors. We will only
-                #       iterate over the cells within the border of zeros.
+                # loop through entire grid using these top two nested for loops
                 for row in range(1, ITERATOR_LIMIT):
                     for col in range(1, ITERATOR_LIMIT):
+                        # traverse the list of individuals "sitting" in this particular grid location
                         for individual in SIM_MATRICES[0][row][col]:
+                            # analyze the individual's state of health and set for updating if necessary
                             individual.flag_for_update(checkNeighbors((row, col)))
+                # loop through entire grid again and update all individuals' object variables
                 for row in range(1, ITERATOR_LIMIT):
                     for col in range(1, ITERATOR_LIMIT):
                         for individual in SIM_MATRICES[0][row][col]:
-                            individual.apply_changes((row, col))
-                            # if the individual didn't move, don't copy and remove them to the same list
-                            if individual.location != (row, col):
-                                SIM_MATRICES[0][individual.location[0]][individual.location[1]].append(individual)
-                                SIM_MATRICES[0][row][col].remove(individual)
-
-                        # # if a spot is unoccupied
-                        # if SIM_MATRICES[0][row][col][0] == 0 or SIM_MATRICES[0][row][col][0] == 4:
-                        #     SIM_MATRICES[1][row][col] = SIM_MATRICES[0][row][col]
-                        # # if a spot is occupied by a susceptible person
-                        # elif SIM_MATRICES[0][row][col][0] == 1:
-                        #     SIM_MATRICES[1][row][col], num_latent, num_susceptible = infect(SIM_MATRICES[0][row][col], (row, col), num_latent, num_susceptible)
-                        # # if a spot is occupied by an latent person
-                        # elif SIM_MATRICES[0][row][col][0] == 2:
-                        #     SIM_MATRICES[1][row][col], num_infectious, num_latent = infectious(SIM_MATRICES[0][row][col], num_infectious, num_latent)
-                        # # if a spot is occupied by a infectious person
-                        # elif SIM_MATRICES[0][row][col][0] == 3:
-                        #     SIM_MATRICES[1][row][col], num_infectious, num_recovered = recovered(SIM_MATRICES[0][row][col], num_infectious, num_recovered)
-
-                # # copy second grid to first grid and begin the next day of the simulation, zero-ing out grid 2
-                # for row in range(1, ITERATOR_LIMIT):
-                #     for col in range(1, ITERATOR_LIMIT):
-                #         SIM_MATRICES[0][row][col] = SIM_MATRICES[1][row][col]
-                #         SIM_MATRICES[1][row][col] = (0,0,0,0,0)
-                #         print(SIM_MATRICES[0][row][col][0], end='', flush=True)
-                #     print()
-                # print('---------------------------')
+                            if not individual.updated:
+                                individual.apply_changes((row, col))
+                                # only copy to and remove an individual if they didn't move to a different location in the grid
+                                if individual.location != (row, col):
+                                    # append them to the list in their new location
+                                    SIM_MATRICES[0][individual.location[0]][individual.location[1]].append(individual)
+                                    # remove them from the list in their old location
+                                    SIM_MATRICES[0][row][col].remove(individual)
                 # outputs the end-of-day state of the grid to csv output file
                 outfile.write(str(num_days)+','+str(num_susceptible)+','+str(num_latent)+','+str(num_infectious)+','+str(num_recovered)+'\n')
-                print(num_days)
+                print("Day:", num_days)
                 num_days += 1
 
 ##############################################################################################################
@@ -291,28 +316,6 @@ def checkNeighbors(location):
             if person.state_of_health == 2:
                 count += 1
     return count
-
-# # determine if a latent individual jumps to the infectious stage
-# def infectious(individual, infectious_count, latent_count):
-#     # if the individual has not been in the latent stage for the latent period,
-#     #       increment the 'b' index in the individual's tuple
-#     if individual[1] < LATENT_PERIOD:
-#         return (2,individual[1]+1,0,0,individual[4]), (infectious_count), (latent_count)
-#     # if the individual has been in the latent stage for the latent period,
-#     #       increment the 'a' index of the individual's tuple
-#     else:
-#         return (3,0,0,0,individual[4]), (infectious_count+1), (latent_count-1)
-
-# # determine if an infectious individual jumps to the recovered stage
-# def recovered(individual, infectious_count, recovered_count):
-#     # if the individual has not been in the infectious stage for the infectious period,
-#     #       increment the 'c' index in the individual's tuple
-#     if individual[2] < INFECTIOUS_PERIOD:
-#         return (3,0,individual[2]+1,0,individual[4]), infectious_count, recovered_count
-#     # if the individual has been in the infectious stage for the infectious period,
-#     #       increment the 'a' index of the individual's tuple
-#     else:
-#         return (4,0,0,0,individual[4]), infectious_count-1, recovered_count+1
 
 # the `int main()` of the program
 if __name__ == "__main__":
