@@ -1,8 +1,8 @@
 {
-    "num_row":10,
-    "num_col":10,
-    "init_infected":5,
-    "population":100,
+    "num_row":5,
+    "num_col":5,
+    "init_infected":4,
+    "population":5,
     "age_dist": {
         "24":0.399,
         "44":0.293,
@@ -17,7 +17,7 @@
     },
     "latent_period_min":4,
     "latent_period_max":6,
-    "infectious_period_min":2,
+    "infectious_period_min":10,
     "infectious_period_max":14,
     "max_exposure": 15,
     "mask_wearer": 0.84,
