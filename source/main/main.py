@@ -9,23 +9,11 @@
 
 import random
 import numpy as np
+from math import ceil, sqrt
+from PIL import Image
 from Individual import Individual
 from constants import PARAMS, NUM_ROWS, NUM_COLS, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
 
-# Create the two grids for the simulation
-# Each index represents a location an individual can occupy
-# The first 2D array / grid represents the current state of the simulation
-# The second grid will represent the state of the disease spread based on the first grid
-# Each element in the grid represents a location in the world as a tuple with the following schema:
-    # (a, b, c, d, e) = (location state, days latent, days infectious, time exposed, individual id)
-        # 'a' can be 1 (occupied by susceptible individual), 2 (occupied by latent individual), 
-        #       3 (occupied by infectious individual), 4 (occupied by recovered individual).
-        #       If an element is just a zero, the location is unoccupied
-        # 'b' is an integer between 0 and the latent period, inclusive
-        # 'c' is an integer between 0 and the infectious period, inclusive
-        # 'd' is a float value that represents the time someone maintained close contact with an infectious individual
-        # 'e' is a number given to an individual to identify them in the end-of-day report
-        # if an element is (0,0,0,0,0), the location is unoccupied
 sim_matrices = np.zeros((NUM_ROWS, NUM_COLS), dtype=object)
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
@@ -97,15 +85,14 @@ def main():
 
         # main simulation block
         # open a 'csv' file for outputting the daily reports, explained later
-        with open("CAoutput.csv", 'w') as outfile:
-            # output the csv file headers
-            outfile.write("day,susceptible,latent,infectious,recovered\n")
+        with open("../output/CAoutput.csv", 'w') as outfile:
             # length of simulation in days
             num_days = 0
+            print(num_days)
+            # output the csv file headers
+            outfile.write("day,susceptible,latent,infectious,recovered\n")
             # loop until there are no individuals in the latent nor infectious stages
             while state_list[1] or state_list[2]:
-                # print("Day:", num_days)
-                # print(state_list)
                 # outputs the beginning-of-day state of the grid to csv output file
                 outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
                 # resets the counters for each state of health category in `state_list`
@@ -114,21 +101,14 @@ def main():
                 temp = 0
                 for row in range(1, ITERATOR_LIMIT):
                     for col in range(1, ITERATOR_LIMIT):
-                        # print('[',end='')
                         # traverse the list of individuals "sitting" in this particular grid location
                         for individual in sim_matrices[row][col]:
-                            # print(individual.id, individual.state_of_health, end=',')
                             temp += 1
                             # analyze the individual's state of health and set for updating if necessary
                             individual.flag_for_update(checkNeighbors((row, col)))
-                #         print(']',end='')
-                #     print('\n')
-                # print('\n')
-                print("This should be 5", temp)
                 # loop through entire grid again and update all individuals' object variables
                 for row in range(1, ITERATOR_LIMIT):
                     for col in range(1, ITERATOR_LIMIT):
-                        # print(len(sim_matrices[row][col]),end='')
                         # `individual_count` is the number of individuals in the current spot in the simulation grid.
                         #       I tried using the `for individual in sim_matrices[row][col]`, but when I think when I
                         #       try to remove an individual from the list to move them to their next location in the sim grid,
@@ -137,20 +117,11 @@ def main():
                         #       move it to its next location, leaving the second one waiting to be looped over. The for loop only sees one
                         #       element left, so it thinks it has already evaluated it. Get the point? No? Oh well.
                         individual_count = len(sim_matrices[row][col])
-                        print(individual_count)
                         x = 0
                         while x < len(sim_matrices[row][col]):
-                        # for x in range(0, individual_count):
-                            # list_len += 1
-                            # if not individual.updated:
-                            print("this is x:", x)
-                            print("this is length of list:", len(sim_matrices[row][col]))
                             results = sim_matrices[row][col][x].apply_changes((row, col))
-                            # print("This individual is:", results)
                             # update the object variables of the individual and add them to the state_list tally if they haven't already
                             if results != -1:
-                                # print(individual)
-                                # print(results)
                                 state_list[results] += 1
                             # only copy to and remove an individual if they didn't move to a different location in the grid
                             if sim_matrices[row][col][x].location != (row, col):
@@ -160,15 +131,12 @@ def main():
                                 sim_matrices[row][col].remove(sim_matrices[row][col][x])
                                 x -= 1
                             x += 1
-                                # individual_count -= 1
-                        # print(list_len, end='')
-                #         print(' ', end='')
-                #     print('\n')
-                # print('\n')
-                print("-----------------")
                 num_days += 1
+            visualize()
             # output the last day's numbers to csv file
             outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
+            # each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by
+            # taking the square root of the number of individuals in the spot and taking the ceiling of the result. That value will be N.
 
 ##############################################################################################################
 #                                              FUNCTIONS
@@ -205,6 +173,23 @@ def checkNeighbors(location):
             if person.state_of_health == 2:
                 count += 1
     return count
+
+def visualize():
+    # open the background image to which we will paste the individuals' tiles
+    canvas = Image.open("../../resources/bkgd.png")
+    default_tile_size = 1000/NUM_ROWS
+    for row in range(1, ITERATOR_LIMIT):
+        for col in range(1, ITERATOR_LIMIT):
+            N = ceil(sqrt(len(sim_matrices[row][col])))
+            mini_tile_size = default_tile_size / N
+            mini_row = 0
+            mini_col = 0
+            for individual in sim_matrices[row][col]:
+                if mini_row == N:
+                    mini_col += 1
+                    mini_row = 0
+                Image.paste(canvas, (row + (mini_tile_size*mini_row), col + (mini_tile_size*mini_col)))
+
 
 # the `int main()` of the program
 if __name__ == "__main__":
