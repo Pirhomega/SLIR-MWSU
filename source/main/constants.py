@@ -2,7 +2,7 @@ import json, sys
 
 # grab the parameters file from the command line
 PARAMS = {}
-with open(sys.argv[1], 'r') as f:
+with open("../../resources/params.json", 'r') as f:
     PARAMS = json.loads(f.read())
 
 # disease parameters

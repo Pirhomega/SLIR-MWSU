@@ -36,14 +36,14 @@ class Individual:
         self.change = False
         # signals the individual has been moved from their previous location
         self.updated = False
-        print("ID:", self.id)
-        print("Age:", self.age)
-        print("State of health:", self.state_of_health)
-        print("Chance of dying:", self.mortality*100, '%')
-        print("Tendency:", self.tendency)
-        print("Latent period:", self.days_in_latent)
-        print("Infectious period:", self.days_in_infectious)
-        print('\n')
+        # print("ID:", self.id)
+        # print("Age:", self.age)
+        # print("State of health:", self.state_of_health)
+        # print("Chance of dying:", self.mortality*100, '%')
+        # print("Tendency:", self.tendency)
+        # print("Latent period:", self.days_in_latent)
+        # print("Infectious period:", self.days_in_infectious)
+        # print('\n')
 
     # assess the individual's state of health and determine if they progress through the disease
     # This means susceptible individuals will have their surroundings analyzed for number of infectious
