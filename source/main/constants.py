@@ -1,3 +1,8 @@
+"""
+    Module:     constants.py
+    Purpose:    To separate the constants used in main from the main code for easier reading.
+"""
+
 import json, sys
 
 # grab the parameters file from the command line
@@ -20,8 +25,8 @@ SYMP_CHANCE = PARAMS["symptomatic"]
 CONTACT_TYPE = PARAMS["vonNeumann"]
 # constants pertaining to the simulation, such as
 #       grid dimensions
-NUM_ROWS = PARAMS["num_row"]+2
-NUM_COLS = PARAMS["num_col"]+2
+NUM_ROWS_FULL = PARAMS["num_row"]+2
+NUM_COLS_FULL = PARAMS["num_col"]+2
 GRID_SIZE = PARAMS["num_row"]
 # variable that will keep any for-loops using it from traversing the border of a grid
-ITERATOR_LIMIT = NUM_ROWS-1
+ITERATOR_LIMIT = NUM_ROWS_FULL-1

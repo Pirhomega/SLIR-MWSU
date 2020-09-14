@@ -1,8 +1,8 @@
 {
-    "num_row":4,
-    "num_col":4,
+    "num_row":100,
+    "num_col":100,
     "init_infected":10,
-    "population":16,
+    "population":6000,
     "age_dist": {
         "24":0.399,
         "44":0.293,
@@ -19,7 +19,7 @@
     "latent_period_max":6,
     "infectious_period_min":10,
     "infectious_period_max":14,
-    "max_exposure": 15,
+    "max_exposure": 5,
     "mask_wearer": 0.84,
     "separator": 0.50,
     "symptomatic": 0.60,

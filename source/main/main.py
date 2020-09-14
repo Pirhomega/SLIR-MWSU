@@ -12,9 +12,10 @@ import numpy as np
 from math import ceil, sqrt
 from PIL import Image
 from Individual import Individual
-from constants import PARAMS, RESOURCES_FOLDER, OUTPUT_FOLDER, NUM_ROWS, NUM_COLS, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
+from constants import PARAMS, RESOURCES_FOLDER, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
 
-sim_matrices = np.zeros((NUM_ROWS, NUM_COLS), dtype=object)
+# the simulation grid
+sim_matrices = np.zeros((NUM_ROWS_FULL, NUM_COLS_FULL), dtype=object)
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
 def main():
@@ -30,17 +31,13 @@ def main():
     # used to give each individual in the population a unique ID
     individual_counter = 1
 
-    # # if the population value is too large to fit in the simulation grid, warn the user and end program
-    # if PARAMS["population"] > GRID_SIZE*GRID_SIZE:
-    #     print("The population -", PARAMS["population"], "- is too great to fit within the grid borders.\nPlease select a population less than or equal to", GRID_SIZE*GRID_SIZE)
-    # else:
     # initialize all grids to be empty lists
-    for a in range(NUM_ROWS):
-        for b in range(NUM_COLS):
+    for a in range(NUM_ROWS_FULL):
+        for b in range(NUM_COLS_FULL):
             sim_matrices[a][b] = []
 
-    # These following two while loops will only place individuals randomly in the first grid so as to leave
-    #       a border of zeros around the grid's outside. E.G.
+    # These following two while loops will only place individuals randomly in the grid so as to leave
+    #       a border of empty lists around the grid's outside. E.G.
     #       GRID A ->   |0 0 0 0 0| (the 'X' spots are usable; the '0' spots aren't)
     #                   |0 X X X 0|
     #                   |0 X X X 0|
@@ -53,12 +50,11 @@ def main():
     for key in PARAMS["age_dist"]:
         ages.append(key)
         age_weights.append(PARAMS["age_dist"][key])
-    # disperse all initially infected individuals randomly throughout the first grid,
-    #       but only place them in unoccupied locations
+    # disperse all initially infected individuals randomly throughout the grid
     y = PARAMS["init_infected"]
     while y > 0:
-        randx = random.randint(1, NUM_ROWS-2)
-        randy = random.randint(1, NUM_COLS-2)
+        randx = random.randint(1, NUM_ROWS_FULL-2)
+        randy = random.randint(1, NUM_COLS_FULL-2)
         # create an Individual object with its identifier, age, their age's mortality rate, and state
         age = random.choices(ages, age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
@@ -70,8 +66,8 @@ def main():
     #       randomly throughout the first grid but only place them in unoccupied locations
     y = PARAMS["population"] - PARAMS["init_infected"]
     while y > 0:
-        randx = random.randint(1, NUM_ROWS-2)
-        randy = random.randint(1, NUM_COLS-2)
+        randx = random.randint(1, NUM_ROWS_FULL-2)
+        randy = random.randint(1, NUM_COLS_FULL-2)
         # create an Individual object with its identifier, age, their age's mortality rate, and state
         age = random.choices(ages,age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
@@ -88,11 +84,17 @@ def main():
     with open(OUTPUT_FOLDER+"/CAoutput.csv", 'w') as outfile:
         # length of simulation in days
         num_days = 0
-        print(num_days)
         # output the csv file headers
         outfile.write("day,susceptible,latent,infectious,recovered\n")
+        # open the background image to which we will paste the individuals' tiles,
+        #       appending each modified image to `images`. `images` starts with a 
+        #       defining image that will signifiy the beginning of the gif if looped
+        #       infinitely
+        canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
+        images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
         # loop until there are no individuals in the latent nor infectious stages
         while state_list[1] or state_list[2]:
+            print(num_days)
             # outputs the beginning-of-day state of the grid to csv output file
             outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
             # resets the counters for each state of health category in `state_list`
@@ -131,26 +133,24 @@ def main():
                             x -= 1
                         x += 1
             num_days += 1
-            ##################################################
-            # print the entire grid, including the borders
-            for x in range(6):
-                for y in range(6):
-                    print('[', end='')
-                    for individual in sim_matrices[x][y]:
-                        print(individual.state_of_health, end=',')
-                    print(']', end='')
-                print('\n')
-            print('-------------------------------')
-            ##################################################
-        visualize()
+            # comment `debug_print()` out when not in debug mode
+            # debug_print()
+            # create an image the simulation state and append to a list of images to later 
+            #       turn into a gif
+            images.append(visualize(canvas.copy()))
         # output the last day's numbers to csv file
-        outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
-        # each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by
-        # taking the square root of the number of individuals in the spot and taking the ceiling of the result. That value will be N.
+        outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','\
+            +str(state_list[2])+','+str(state_list[3])+'\n')
+        print("Output dumped to .csv file in `output` folder.")
+        print("Preparing the .gif of the simulation.")
+        # save the list of simulation images as a gif
+        images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=images[1:], \
+            duration=200, loop=0)
+        print("Simulation finished!")
 
-##############################################################################################################
+###################################################################################################
 #                                              FUNCTIONS
-##############################################################################################################
+###################################################################################################
 
 # count how many infectious neighbors an individual has
 def checkNeighbors(location):
@@ -184,19 +184,17 @@ def checkNeighbors(location):
                 count += 1
     return count
 
-def visualize():
-    # open the background image to which we will paste the individuals' tiles
-    canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
+# each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by
+# taking the square root of the number of individuals in the spot and taking the ceiling of the result. That value will be N.
+def visualize(canvas):
     default_tile_size = ceil(1000/GRID_SIZE)
     for row in range(1, ITERATOR_LIMIT):
         for col in range(1, ITERATOR_LIMIT):
-            print("[", end='')
             N = ceil(sqrt(max(1, len(sim_matrices[row][col]))))
             mini_tile_size = int(default_tile_size / N)
             mini_row = 0
             mini_col = 0
             for individual in sim_matrices[row][col]:
-                print(individual.state_of_health, end=',')
                 tile = Image.open(RESOURCES_FOLDER+'/'+str(individual.state_of_health)+".png")
                 temp = tile.resize((mini_tile_size, mini_tile_size))
                 if mini_col == N:
@@ -206,10 +204,19 @@ def visualize():
                     box=((col-1)*default_tile_size + (mini_tile_size*mini_col), \
                         (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                 mini_col += 1
+    canvas.save("testbooger.png", quality=95)
+    return canvas
+
+def debug_print():
+    # print the entire grid, including the borders
+    for x in range(6):
+        for y in range(6):
+            print('[', end='')
+            for individual in sim_matrices[x][y]:
+                print(individual.state_of_health, end=',')
             print(']', end='')
         print('\n')
-    print('----------------------')
-    canvas.save("testbooger.png", quality=95)
+    print('-------------------------------')
 
 
 # the `int main()` of the program

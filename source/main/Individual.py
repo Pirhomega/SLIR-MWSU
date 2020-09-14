@@ -1,9 +1,31 @@
+"""
+Module:     Individual.py
+Purpose:    To separate the `Individual` class from the main code for easier reading.
+            See doc string for the class for more info
+"""
+
 import random
-from constants import NUM_ROWS, NUM_COLS, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
+from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
     MAX_EXPOSURE
 
 class Individual:
+    '''
+    class:      Individual
+    purpose:    represents an individual in the SLIR simulation.
+    input:
+                `iden`: unique, identification integer (must be greater than or equal to zero) for class object
+                `age`: in years, an integer value selected from the keys defined in the 'age_dist' field in `params.json`
+                `mortality`: a float value representing the ratio of deaths per person in an age group defined in
+                    'age_dist_disease' field in `params.json`
+                `state`: the individual's state of health, an integer value between zero and three
+                `location`: an integer tuple representing the individual's row and column location in the simulation grid
+    variables:  `state_of_health`, `id`, `age`, `mortality`, `location`, `tendency`, `days_in_state`,
+                `days_in_latent`, `days_in_infectious`, `exposure_points`, `mask_wearer`, `quarantiner`,
+                `symptomatic`, `change`, `updated`
+    functions:  `flag_for_update`, `check_if_latent`, `check_if_infectious`, `check_if_removed`, `apply_changes`, 
+                `select_new_location`
+    '''
     def __init__(self, iden, age, mortality, state, location):
         # can be 0 (susceptible), 1 (latent), 2 (infectious), 3 (recovered), or 4 (immune)
         self.state_of_health = state
@@ -16,7 +38,7 @@ class Individual:
         # individual's current location in the simulation grid
         self.location = location
         # location this individual wants to travel to eventually
-        self.tendency = (random.randint(1, NUM_ROWS-3), random.randint(1, NUM_COLS-3))
+        self.tendency = (random.randint(1, NUM_ROWS_FULL-3), random.randint(1, NUM_COLS_FULL-3))
         # number of units of time this individual has spent in their current state
         self.days_in_state = 0
         # number of days this individual will suffer in the latent stage of the disease
@@ -127,7 +149,7 @@ class Individual:
                 # print("Their new position is", self.location)
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
-                self.tendency = (random.randint(1, NUM_ROWS-3), random.randint(1, NUM_COLS-3))
+                self.tendency = (random.randint(1, NUM_ROWS_FULL-3), random.randint(1, NUM_COLS_FULL-3))
                 # print("Individual", self.id, "will now tend toward", self.tendency)
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
