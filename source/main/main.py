@@ -12,7 +12,7 @@ import numpy as np
 from math import ceil, sqrt
 from PIL import Image
 from Individual import Individual
-from constants import PARAMS, NUM_ROWS, NUM_COLS, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
+from constants import PARAMS, RESOURCES_FOLDER, OUTPUT_FOLDER, NUM_ROWS, NUM_COLS, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
 
 sim_matrices = np.zeros((NUM_ROWS, NUM_COLS), dtype=object)
 
@@ -85,7 +85,7 @@ def main():
 
     # main simulation block
     # open a 'csv' file for outputting the daily reports, explained later
-    with open("../output/CAoutput.csv", 'w') as outfile:
+    with open(OUTPUT_FOLDER+"/CAoutput.csv", 'w') as outfile:
         # length of simulation in days
         num_days = 0
         print(num_days)
@@ -135,10 +135,10 @@ def main():
             # print the entire grid, including the borders
             for x in range(6):
                 for y in range(6):
-                    print('[',end='')
+                    print('[', end='')
                     for individual in sim_matrices[x][y]:
-                        print(individual.state_of_health,end=',')
-                    print(']',end='')
+                        print(individual.state_of_health, end=',')
+                    print(']', end='')
                 print('\n')
             print('-------------------------------')
             ##################################################
@@ -186,28 +186,30 @@ def checkNeighbors(location):
 
 def visualize():
     # open the background image to which we will paste the individuals' tiles
-    canvas = Image.open("../../resources/bkgd.png")
+    canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
     default_tile_size = ceil(1000/GRID_SIZE)
     for row in range(1, ITERATOR_LIMIT):
         for col in range(1, ITERATOR_LIMIT):
-            print("[",end='')
-            N = ceil(sqrt(max(1,len(sim_matrices[row][col]))))
+            print("[", end='')
+            N = ceil(sqrt(max(1, len(sim_matrices[row][col]))))
             mini_tile_size = int(default_tile_size / N)
             mini_row = 0
             mini_col = 0
             for individual in sim_matrices[row][col]:
-                print(individual.state_of_health,end=',')
-                tile = Image.open("../../resources/"+str(individual.state_of_health)+".png")
-                temp = tile.resize((mini_tile_size,mini_tile_size))
-                if mini_row == N:
+                print(individual.state_of_health, end=',')
+                tile = Image.open(RESOURCES_FOLDER+'/'+str(individual.state_of_health)+".png")
+                temp = tile.resize((mini_tile_size, mini_tile_size))
+                if mini_col == N:
                     mini_row += 1
                     mini_col = 0
-                canvas.paste(temp, box=((row-1)*default_tile_size + (mini_tile_size*mini_row), (col-1)*default_tile_size + (mini_tile_size*mini_col)))
+                canvas.paste(temp, \
+                    box=((col-1)*default_tile_size + (mini_tile_size*mini_col), \
+                        (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                 mini_col += 1
-            print(']',end='')
+            print(']', end='')
         print('\n')
     print('----------------------')
-    canvas.save("testbooger.png",quality=95)
+    canvas.save("testbooger.png", quality=95)
 
 
 # the `int main()` of the program

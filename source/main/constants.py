@@ -2,8 +2,11 @@ import json, sys
 
 # grab the parameters file from the command line
 PARAMS = {}
-with open("../../resources/params.json", 'r') as f:
+with open(sys.argv[1], 'r') as f:
     PARAMS = json.loads(f.read())
+
+RESOURCES_FOLDER = PARAMS["resources"]
+OUTPUT_FOLDER = PARAMS["output"]
 
 # disease parameters
 LATENT_PERIOD_MIN = PARAMS["latent_period_min"]

@@ -23,5 +23,8 @@
     "mask_wearer": 0.84,
     "separator": 0.50,
     "symptomatic": 0.60,
-    "vonNeumann": true
+    "vonNeumann": true,
+    
+    "resources":"./resources",
+    "output":"./source/output"
 }
