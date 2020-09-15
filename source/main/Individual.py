@@ -33,8 +33,8 @@ class Individual:
         self.id = iden
         # individual's age
         self.age = age
-        # the individual's mortality rate based on their age
-        self.mortality = mortality
+        # will the individual die when they enter the recovered stage?
+        self.die_when_recovered = bool(random() > mortality)
         # individual's current location in the simulation grid
         self.location = location
         # location this individual wants to travel to eventually
@@ -42,9 +42,9 @@ class Individual:
         # number of units of time this individual has spent in their current state
         self.days_in_state = 0
         # number of days this individual will suffer in the latent stage of the disease
-        self.days_in_latent = randint(LATENT_PERIOD_MIN,LATENT_PERIOD_MAX)
+        self.days_in_latent = randint(LATENT_PERIOD_MIN, LATENT_PERIOD_MAX)
         # number of days this individual will suffer in the infectious stage of the disease
-        self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN,INFECTIOUS_PERIOD_MAX)
+        self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN, INFECTIOUS_PERIOD_MAX)
         if state != 2:
             # number of exposure points for this individual
             self.exposure_points = 0
@@ -156,21 +156,23 @@ class Individual:
             return self.state_of_health
         # return a negative one to indicate this individual has already been updated for the current simulation day
         return -1
-    
+
     def select_new_location(self, spot):
         """
         moves the individual in the simulation grid
         """
-        new_spot_row = spot[0]
-        new_spot_col = spot[1]
-        drow = spot[0] - self.tendency[0]
-        dcol = spot[1] - self.tendency[1]
-        if drow < 0:
-            new_spot_row = spot[0] + 1
-        elif drow > 0:
-            new_spot_row = spot[0] - 1
-        if dcol < 0:
-            new_spot_col = spot[1] + 1
-        elif dcol > 0:
-            new_spot_col = spot[1] - 1
-        self.location = (new_spot_row, new_spot_col)
+        # only move the individual if they are not recovered OR if they are recovered but still alive
+        if (self.state_of_health != 3) or (self.state_of_health == 3 and not self.die_when_recovered):
+            new_spot_row = spot[0]
+            new_spot_col = spot[1]
+            drow = spot[0] - self.tendency[0]
+            dcol = spot[1] - self.tendency[1]
+            if drow < 0:
+                new_spot_row = spot[0] + 1
+            elif drow > 0:
+                new_spot_row = spot[0] - 1
+            if dcol < 0:
+                new_spot_col = spot[1] + 1
+            elif dcol > 0:
+                new_spot_col = spot[1] - 1
+            self.location = (new_spot_row, new_spot_col)

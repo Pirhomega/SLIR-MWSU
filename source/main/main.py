@@ -147,7 +147,7 @@ def main():
         # save the list of simulation images as a gif
         images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=images[1:], \
             duration=200, loop=0)
-        remove("temp.png")
+        # remove("temp.png")
         print("Simulation finished!")
 
 ###################################################################################################
