@@ -7,15 +7,16 @@
 #       Each day, a report will be generated and sent to an output file. The report will contain the locations of the
 #       individuals at the end of each day, as well as the number of infectious, latent, and recovered individuals.
 
-import random
-import numpy as np
+from os import remove
+from random import randint, choices
+from numpy import zeros
 from math import ceil, sqrt
 from PIL import Image
 from Individual import Individual
 from constants import PARAMS, RESOURCES_FOLDER, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, GRID_SIZE, ITERATOR_LIMIT, CONTACT_TYPE
 
 # the simulation grid
-sim_matrices = np.zeros((NUM_ROWS_FULL, NUM_COLS_FULL), dtype=object)
+sim_matrices = zeros((NUM_ROWS_FULL, NUM_COLS_FULL), dtype=object)
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
 def main():
@@ -53,10 +54,10 @@ def main():
     # disperse all initially infected individuals randomly throughout the grid
     y = PARAMS["init_infected"]
     while y > 0:
-        randx = random.randint(1, NUM_ROWS_FULL-2)
-        randy = random.randint(1, NUM_COLS_FULL-2)
+        randx = randint(1, NUM_ROWS_FULL-2)
+        randy = randint(1, NUM_COLS_FULL-2)
         # create an Individual object with its identifier, age, their age's mortality rate, and state
-        age = random.choices(ages, age_weights)[0]
+        age = choices(ages, age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
         sim_matrices[randx][randy].append(Individual(individual_counter, int(age), age_chance, 2, (randx, randy)))
         y -= 1
@@ -66,10 +67,10 @@ def main():
     #       randomly throughout the first grid but only place them in unoccupied locations
     y = PARAMS["population"] - PARAMS["init_infected"]
     while y > 0:
-        randx = random.randint(1, NUM_ROWS_FULL-2)
-        randy = random.randint(1, NUM_COLS_FULL-2)
+        randx = randint(1, NUM_ROWS_FULL-2)
+        randy = randint(1, NUM_COLS_FULL-2)
         # create an Individual object with its identifier, age, their age's mortality rate, and state
-        age = random.choices(ages,age_weights)[0]
+        age = choices(ages,age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
         sim_matrices[randx][randy].append(Individual(individual_counter, int(age), age_chance, 0, (randx, randy)))
         y -= 1
@@ -146,6 +147,7 @@ def main():
         # save the list of simulation images as a gif
         images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=images[1:], \
             duration=200, loop=0)
+        remove("temp.png")
         print("Simulation finished!")
 
 ###################################################################################################
@@ -204,7 +206,7 @@ def visualize(canvas):
                     box=((col-1)*default_tile_size + (mini_tile_size*mini_col), \
                         (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                 mini_col += 1
-    canvas.save("testbooger.png", quality=95)
+    canvas.save("temp.png", quality=95)
     return canvas
 
 def debug_print():
