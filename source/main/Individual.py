@@ -4,7 +4,7 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
             See doc string for the class for more info
 """
 
-import random
+from random import random, randint
 from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
     MAX_EXPOSURE
@@ -38,22 +38,22 @@ class Individual:
         # individual's current location in the simulation grid
         self.location = location
         # location this individual wants to travel to eventually
-        self.tendency = (random.randint(1, NUM_ROWS_FULL-3), random.randint(1, NUM_COLS_FULL-3))
+        self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
         # number of units of time this individual has spent in their current state
         self.days_in_state = 0
         # number of days this individual will suffer in the latent stage of the disease
-        self.days_in_latent = random.randint(LATENT_PERIOD_MIN,LATENT_PERIOD_MAX)
+        self.days_in_latent = randint(LATENT_PERIOD_MIN,LATENT_PERIOD_MAX)
         # number of days this individual will suffer in the infectious stage of the disease
-        self.days_in_infectious = random.randint(INFECTIOUS_PERIOD_MIN,INFECTIOUS_PERIOD_MAX)
+        self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN,INFECTIOUS_PERIOD_MAX)
         if state != 2:
             # number of exposure points for this individual
             self.exposure_points = 0
         # the fact the individual does or does not wear a mask when they know they're infected
-        self.mask_wearer = bool(random.random() < MASK_CHANCE)
+        self.mask_wearer = bool(random() < MASK_CHANCE)
         # the fact the individual does or does not quarantine when they know they're infected
-        self.quarantiner = bool(random.random() < QUARAN_CHANCE)
+        self.quarantiner = bool(random() < QUARAN_CHANCE)
         # the fact the individual is symptomatic when infected
-        self.symptomatic = bool(random.random() < SYMP_CHANCE)
+        self.symptomatic = bool(random() < SYMP_CHANCE)
         # signals a state change is necessary
         self.change = False
         # signals the individual has been moved from their previous location
@@ -149,7 +149,7 @@ class Individual:
                 # print("Their new position is", self.location)
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
-                self.tendency = (random.randint(1, NUM_ROWS_FULL-3), random.randint(1, NUM_COLS_FULL-3))
+                self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
                 # print("Individual", self.id, "will now tend toward", self.tendency)
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True

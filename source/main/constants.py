@@ -3,12 +3,13 @@
     Purpose:    To separate the constants used in main from the main code for easier reading.
 """
 
-import json, sys
+from json import loads
+from sys import argv
 
 # grab the parameters file from the command line
 PARAMS = {}
-with open(sys.argv[1], 'r') as f:
-    PARAMS = json.loads(f.read())
+with open(argv[1], 'r') as f:
+    PARAMS = loads(f.read())
 
 RESOURCES_FOLDER = PARAMS["resources"]
 OUTPUT_FOLDER = PARAMS["output"]
