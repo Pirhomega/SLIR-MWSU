@@ -12,4 +12,4 @@ This project seeks to simulate disease spread in a student population using a ce
 
 ## Current state of the project
 
-Runs indefinitely for some reason. I.e. it don't work right just yet.
+Need documentation and some features still need to be added. ALMOST DONE
