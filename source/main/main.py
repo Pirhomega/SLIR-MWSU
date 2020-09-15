@@ -7,7 +7,7 @@
 #       Each day, a report will be generated and sent to an output file. The report will contain the locations of the
 #       individuals at the end of each day, as well as the number of infectious, latent, and recovered individuals.
 
-from os import remove
+from multiprocessing import Process, Queue
 from random import randint, choices
 from numpy import zeros
 from math import ceil, sqrt
@@ -147,7 +147,6 @@ def main():
         # save the list of simulation images as a gif
         images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=images[1:], \
             duration=200, loop=0)
-        # remove("temp.png")
         print("Simulation finished!")
 
 ###################################################################################################
@@ -206,7 +205,7 @@ def visualize(canvas):
                     box=((col-1)*default_tile_size + (mini_tile_size*mini_col), \
                         (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                 mini_col += 1
-    canvas.save("temp.png", quality=95)
+    canvas.save(OUTPUT_FOLDER+"/final_sim_state.png", quality=95)
     return canvas
 
 def debug_print():
@@ -223,4 +222,10 @@ def debug_print():
 
 # the `int main()` of the program
 if __name__ == "__main__":
-    main()
+    image_processing_queue = Queue()
+    simulation_process = Process(target=main, args=(image_processing_queue,))
+    image_process = Process(target=visualize, args=(image_processing_queue,))
+    simulation_process.start()
+    image_process.start()
+    simulation_process.join()
+    image_process.join()
