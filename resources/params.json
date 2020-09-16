@@ -1,8 +1,8 @@
 {
     "num_row":10,
     "num_col":10,
-    "init_infected":10,
-    "population":60,
+    "init_infected":1,
+    "population":10,
     "age_dist": {
         "24":0.399,
         "44":0.293,
