@@ -1,6 +1,6 @@
 """
     Module:     constants.py
-    Purpose:    To separate the constants used in main from the main code for easier reading.
+    Purpose:    To separate the constants used in `main()` from the main code for easier reading.
 """
 
 from json import loads
@@ -24,6 +24,7 @@ MASK_CHANCE = PARAMS["mask_wearer"]
 QUARAN_CHANCE = PARAMS["separator"]
 SYMP_CHANCE = PARAMS["symptomatic"]
 CONTACT_TYPE = PARAMS["vonNeumann"]
+MAKE_GIF = PARAMS["visualize"]
 # constants pertaining to the simulation, such as
 #       grid dimensions
 NUM_ROWS_FULL = PARAMS["num_row"]+2
@@ -31,3 +32,6 @@ NUM_COLS_FULL = PARAMS["num_col"]+2
 GRID_SIZE = PARAMS["num_row"]
 # variable that will keep any for-loops using it from traversing the border of a grid
 ITERATOR_LIMIT = NUM_ROWS_FULL-1
+
+# facts:
+#       If 6000 people were evenly spaced in MSU's 255 acre land, each person would get 1851.67 sqft

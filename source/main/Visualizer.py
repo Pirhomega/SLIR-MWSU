@@ -36,7 +36,8 @@ class Visualizer():
         canvas_copy = self.canvas.copy()
         # calculate how large a tile should be in pixels to fit GRID_SIZE times GRID_SIZE
         #       of them in the simulation grid
-        default_tile_size = ceil(1000/GRID_SIZE)
+        default_tile_size = ceil(5000/GRID_SIZE)
+        # print(default_tile_size)
         # loop through entire effective area of simulation grid and form the state image
         for row in range(1, ITERATOR_LIMIT):
             for col in range(1, ITERATOR_LIMIT):
@@ -44,6 +45,8 @@ class Visualizer():
                 #       need to find the new size of each tile so we can fit them all in that cell.
                 N = ceil(sqrt(max(1, len(sim_matrices[row][col]))))
                 mini_tile_size = int(default_tile_size / N)
+                # print("This is N:", N)
+                # print("This is mini_tile_size", mini_tile_size)
                 # within each cell of the simulation grid there will be rows and cols
                 mini_row = 0
                 mini_col = 0

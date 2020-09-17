@@ -15,7 +15,7 @@ from time import time
 # from numpy import zeros
 from Individual import Individual
 from Visualizer import Visualizer
-from constants import PARAMS, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE
+from constants import PARAMS, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
 
 # the 2D simulation grid
 # sim_matrices = zeros((NUM_ROWS_FULL, NUM_COLS_FULL), dtype=object)
@@ -87,13 +87,9 @@ def main():
     with open(OUTPUT_FOLDER+"/CAoutput.csv", 'w') as outfile:
         # used to find how much time it takes to create each day's image
         debug_timer_vis = 0.0
-        # open the background image to which we will paste the individuals' tiles,
-        #       appending each modified image to `images`. `images` starts with a 
-        #       defining image that will signifiy the beginning of the gif if looped
-        #       infinitely
-        sim_gif = Visualizer()
-        # canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
-        # images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
+        if MAKE_GIF:
+            # instantiate visualizer class to create gif of simulation
+            sim_gif = Visualizer()
         # length of simulation in days
         num_days = 0
         # output the csv file headers
@@ -107,14 +103,20 @@ def main():
             # resets the counters for each state of health category in `state_list`
             state_list = [0, 0, 0, 0]
             # loop through entire grid using these top two nested for loops
-            temp = 0
             for row in range(1, ITERATOR_LIMIT):
                 for col in range(1, ITERATOR_LIMIT):
                     # traverse the list of individuals "sitting" in this particular grid location
                     for individual in sim_matrices[row][col]:
-                        temp += 1
+                        # if the individual is not susceptible, there's no need to check their neighbors
+                        #       to see how many exposure points they'll be getting. But since the
+                        #       method `flag_for_update` requires parameter, just give it zero
+                        num_exposure_points = 0
+                        # however, if the individual is susceptible, make the call to `check_neighbors`
+                        if not individual.state_of_health:
+                            num_exposure_points = checkNeighbors((row, col))
                         # analyze the individual's state of health and set for updating if necessary
-                        individual.flag_for_update(checkNeighbors((row, col)))
+                        individual.flag_for_update(num_exposure_points)
+
             # loop through entire grid again and update all individuals' object variables
             for row in range(1, ITERATOR_LIMIT):
                 for col in range(1, ITERATOR_LIMIT):
@@ -142,22 +144,24 @@ def main():
             num_days += 1
             # comment `debug_print()` out when not in debug mode
             # debug_print()
-            # create an image the simulation state and append to a list of images to later
-            #       turn into a gif
-            debug_start_timer = time()
-            sim_gif.visualize(sim_matrices)
-            # images.append(visualize(canvas.copy()))
-            debug_timer_vis += time() - debug_start_timer
+            if MAKE_GIF:
+                # create an image the simulation state and append to a list of images to later
+                #       turn into a gif
+                debug_start_timer = time()
+                sim_gif.visualize(sim_matrices)
+                # images.append(visualize(canvas.copy()))
+                debug_timer_vis += time() - debug_start_timer
         # output the last day's numbers to csv file
         outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','\
             +str(state_list[2])+','+str(state_list[3])+'\n')
         print("Output dumped to .csv file in `output` folder.")
-        print("Preparing the .gif of the simulation.")
-        debug_start_timer = time()
-        sim_gif.finish_and_save_gif()
-        debug_timer_vis += time() - debug_start_timer
+        if MAKE_GIF:
+            print("Preparing the .gif of the simulation.")
+            debug_start_timer = time()
+            sim_gif.finish_and_save_gif()
+            debug_timer_vis += time() - debug_start_timer
+            print("The visualizations took", debug_timer_vis)
         print("Simulation finished!")
-        print("The visualizations took", debug_timer_vis)
 
 ###################################################################################################
 #                                              FUNCTIONS
@@ -165,35 +169,35 @@ def main():
 
 # count how many infectious neighbors an individual has
 def checkNeighbors(location):
-    count = 0
+    num_exposure_points = 0
     # if using the von Neumann method, just check the north, south, east, and west neighbors
     for person in sim_matrices[location[0]][location[1]+1]:
         if person.state_of_health == 2:
-            count += 1
+            num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]-1][location[1]]:
         if person.state_of_health == 2:
-            count += 1
+            num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]][location[1]-1]:
         if person.state_of_health == 2:
-            count += 1
+            num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]+1][location[1]]:
         if person.state_of_health == 2:
-            count += 1
-    # if using the Moore method, consider the corner neighbors
+            num_exposure_points += (1.0 * person.exposure_points_factor)
+    # if using the Moore method, consider the corner neighbors as well as the von Neumann ones
     if not CONTACT_TYPE:
         for person in sim_matrices[location[0]-1][location[1]+1]:
             if person.state_of_health == 2:
-                count += 1
+                num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]-1][location[1]-1]:
             if person.state_of_health == 2:
-                count += 1
+                num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]+1][location[1]-1]:
             if person.state_of_health == 2:
-                count += 1
+                num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]+1][location[1]+1]:
             if person.state_of_health == 2:
-                count += 1
-    return count
+                num_exposure_points += (1.0 * person.exposure_points_factor)
+    return num_exposure_points
 
 ####################################################################################
 #                                   DEBUG CODE                                     #

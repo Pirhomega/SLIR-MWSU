@@ -34,7 +34,7 @@ class Individual:
         # individual's age
         self.age = age
         # will the individual die when they enter the recovered stage?
-        self.die_when_recovered = bool(random() > mortality)
+        self.die_when_recovered = bool(random() < mortality)
         # individual's current location in the simulation grid
         self.location = location
         # location this individual wants to travel to eventually
@@ -45,11 +45,20 @@ class Individual:
         self.days_in_latent = randint(LATENT_PERIOD_MIN, LATENT_PERIOD_MAX)
         # number of days this individual will suffer in the infectious stage of the disease
         self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN, INFECTIOUS_PERIOD_MAX)
+        # doing this prevents the initially infected individuals from having exposure points
+        #       (saves a teensy bit of memory)
         if state != 2:
             # number of exposure points for this individual
-            self.exposure_points = 0
+            self.exposure_points = 0.0
         # the fact the individual does or does not wear a mask when they know they're infected
         self.mask_wearer = bool(random() < MASK_CHANCE)
+        # the factor that, when multiplied by the exposure_points to be added to an individual,
+        #       determines if they get a reduced number or not. E.G. when an infected individual
+        #       is wearing a mask, they will have a reduced effect on the susceptible ones around
+        #       them.
+        self.exposure_points_factor = 1.0
+        if self.mask_wearer:
+            self.exposure_points_factor = 0.5
         # the fact the individual does or does not quarantine when they know they're infected
         self.quarantiner = bool(random() < QUARAN_CHANCE)
         # the fact the individual is symptomatic when infected
@@ -77,7 +86,7 @@ class Individual:
     #       their object variables, their susceptible neighbor being analyzed next in the simulation will be influenced
     #       by that change. Since changes don't take affect until the next day, we just flag the individual for changes and
     #       update the variables after all individuals in the simulation have been analyzed.
-    def flag_for_update(self, num_surrounded):
+    def flag_for_update(self, num_exposure_points):
         """
         Assess the individual's state of health and determine if they progress through the disease
             This means susceptible individuals will have their surroundings analyzed for number of infectious
@@ -96,7 +105,7 @@ class Individual:
         # if they're susceptible, add the number of infectious individuals in their neighborhood to their
         #       exposure point count
         if self.state_of_health == 0:
-            self.check_if_latent(num_surrounded)
+            self.check_if_latent(num_exposure_points)
         # if they're in the latent stage, check if they have stayed the latent period or not
         elif self.state_of_health == 1:
             self.check_if_infectious()
@@ -104,15 +113,13 @@ class Individual:
         elif self.state_of_health == 2:
             self.check_if_removed()
 
-    def check_if_latent(self, num_surrounded):
+    def check_if_latent(self, num_exposure_points):
         """
         checks if the individual has had enough exposures to become infected and join the latent stage
         """
-        self.exposure_points += num_surrounded
-        if self.exposure_points >= MAX_EXPOSURE:
+        self.exposure_points += num_exposure_points
+        if self.exposure_points > MAX_EXPOSURE:
             self.change = True
-        # else:
-            # print("This individual will not become latent. They've stayed", self.days_in_state, "days in susceptible stage",end='')
 
     def check_if_infectious(self):
         """
@@ -120,8 +127,6 @@ class Individual:
         """
         if self.days_in_state == self.days_in_latent:
             self.change = True
-        # else:
-            # print("This individual will not become infectious. They've stayed", self.days_in_state, "days in latent stage",end='')
     
     def check_if_removed(self):
         """
@@ -129,8 +134,6 @@ class Individual:
         """
         if self.days_in_state == self.days_in_infectious:
             self.change = True
-        # else:
-            # print("This individual will not become removed. They've stayed", self.days_in_state, "days in infectious stage",end='')
 
     def apply_changes(self, spot):
         """
@@ -138,19 +141,15 @@ class Individual:
         Returns: the integer representing the individual's state of health
         """
         if not self.updated:
-            # print("Individual", self.id, "has not been updated")
             if self.change:
                 self.days_in_state = 0
                 self.state_of_health += 1
                 self.change = False
             if spot != self.tendency:
-                # print("Individual", self.id, "has not reached their tendency. They're currently at", self.location)
                 self.select_new_location(spot)
-                # print("Their new position is", self.location)
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
                 self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
-                # print("Individual", self.id, "will now tend toward", self.tendency)
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
             return self.state_of_health
