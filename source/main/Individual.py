@@ -4,7 +4,7 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
             See doc string for the class for more info
 """
 
-from random import random, randint
+from random import random, randint, seed
 from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
     MAX_EXPOSURE
@@ -27,6 +27,8 @@ class Individual:
                 `select_new_location`
     '''
     def __init__(self, iden, age, mortality, state, location):
+        # sets the random generator seed
+        seed(a=None, version=2)
         # can be 0 (susceptible), 1 (latent), 2 (infectious), 3 (recovered), or 4 (immune)
         self.state_of_health = state
         # unique identification number for this individual
@@ -60,9 +62,10 @@ class Individual:
         if self.mask_wearer:
             self.exposure_points_factor = 0.5
         # the fact the individual does or does not quarantine when they know they're infected
-        self.quarantiner = bool(random() < QUARAN_CHANCE)
-        # the fact the individual is symptomatic when infected
-        self.symptomatic = bool(random() < SYMP_CHANCE)
+        #       'and-ing' with `bool(random() < SYMP_CHANCE)` says, "if the person knows they're sick,
+        #       they'll isolate. But if they don't show symptoms, they won't know they're sick
+        #       so they won't isolate"
+        self.quarantiner = bool(random() < QUARAN_CHANCE) and bool(random() < SYMP_CHANCE)
         # signals a state change is necessary
         self.change = False
         # signals the individual has been moved from their previous location
@@ -76,16 +79,6 @@ class Individual:
         # print("Infectious period:", self.days_in_infectious)
         # print('\n')
 
-    # assess the individual's state of health and determine if they progress through the disease
-    # This means susceptible individuals will have their surroundings analyzed for number of infectious
-    #       individuals, latent individuals will be checked if they transition to the infectious stage,
-    #       as well as infectious individuals to the recovered stage.
-    #       NOTE: the individual's member variables are not updated at this time to prevent read-after-write hazards
-    #       i.e. individuals' changes to their state of health in one day do not affect their neighbors until the following
-    #       day. For example, an individual transitioned to the infectious stage in day 100. If we went ahead and updated
-    #       their object variables, their susceptible neighbor being analyzed next in the simulation will be influenced
-    #       by that change. Since changes don't take affect until the next day, we just flag the individual for changes and
-    #       update the variables after all individuals in the simulation have been analyzed.
     def flag_for_update(self, num_exposure_points):
         """
         Assess the individual's state of health and determine if they progress through the disease

@@ -5,6 +5,7 @@
 
 # mine
 temp.txt
+./source/main/Visualizer_mag.py
 
 # User-specific files
 *.rsuser

@@ -10,7 +10,7 @@
 
 ###################################################################################################
 
-from random import randint, choices
+from random import randint, choices, seed
 from time import time
 # from numpy import zeros
 from Individual import Individual
@@ -23,6 +23,8 @@ sim_matrices = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
 def main():
+    # sets the random generator seed
+    seed(a=None, version=2)
     # list to track the number of individuals in the susceptible, latent, infectious, and recovered stages
     # The uncommented `state_list` declaration is a less abstract version of the following instructions:
     #       num_susceptible = PARAMS["population"] - PARAMS["init_infected"]
@@ -96,7 +98,7 @@ def main():
         outfile.write("day,susceptible,latent,infectious,recovered\n")
         
         # loop until there are no individuals in the latent nor infectious stages
-        while state_list[1] or state_list[2]:
+        while num_days < 200 or (state_list[1] or state_list[2]):
             print("Day", num_days)
             # outputs the beginning-of-day state of the grid to csv output file
             outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
@@ -172,30 +174,31 @@ def checkNeighbors(location):
     num_exposure_points = 0
     # if using the von Neumann method, just check the north, south, east, and west neighbors
     for person in sim_matrices[location[0]][location[1]+1]:
-        if person.state_of_health == 2:
+        # if the individual is both infectious and not isolating
+        if person.state_of_health == 2 and not person.quarantiner:
             num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]-1][location[1]]:
-        if person.state_of_health == 2:
+        if person.state_of_health == 2 and not person.quarantiner:
             num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]][location[1]-1]:
-        if person.state_of_health == 2:
+        if person.state_of_health == 2 and not person.quarantiner:
             num_exposure_points += (1.0 * person.exposure_points_factor)
     for person in sim_matrices[location[0]+1][location[1]]:
-        if person.state_of_health == 2:
+        if person.state_of_health == 2 and not person.quarantiner:
             num_exposure_points += (1.0 * person.exposure_points_factor)
     # if using the Moore method, consider the corner neighbors as well as the von Neumann ones
     if not CONTACT_TYPE:
         for person in sim_matrices[location[0]-1][location[1]+1]:
-            if person.state_of_health == 2:
+            if person.state_of_health == 2 and not person.quarantiner:
                 num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]-1][location[1]-1]:
-            if person.state_of_health == 2:
+            if person.state_of_health == 2 and not person.quarantiner:
                 num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]+1][location[1]-1]:
-            if person.state_of_health == 2:
+            if person.state_of_health == 2 and not person.quarantiner:
                 num_exposure_points += (1.0 * person.exposure_points_factor)
         for person in sim_matrices[location[0]+1][location[1]+1]:
-            if person.state_of_health == 2:
+            if person.state_of_health == 2 and not person.quarantiner:
                 num_exposure_points += (1.0 * person.exposure_points_factor)
     return num_exposure_points
 

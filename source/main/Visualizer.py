@@ -68,6 +68,7 @@ class Visualizer():
         self.images.append(canvas_copy)
 
     def finish_and_save_gif(self):
+        # use this to fix memory errors: https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
         # save the list of simulation images as a gif
         self.images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=self.images[1:], \
             duration=200, loop=0)
