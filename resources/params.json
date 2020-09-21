@@ -23,9 +23,13 @@
     "mask_wearer": 0.99,
     "separator": 0.80,
     "symptomatic": 0.60,
+
     "vonNeumann": true,
+    "SLIS": false,
+    "immunity_duration_min": 60,
+    "immunity_duration_max": 120,
     
     "resources":"./resources",
     "output":"./source/output",
-    "visualize": false    
+    "visualize": false
 }

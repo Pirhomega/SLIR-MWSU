@@ -25,6 +25,9 @@ QUARAN_CHANCE = PARAMS["separator"]
 SYMP_CHANCE = PARAMS["symptomatic"]
 CONTACT_TYPE = PARAMS["vonNeumann"]
 MAKE_GIF = PARAMS["visualize"]
+IS_SLIS = PARAMS["SLIS"]
+IMMUNITY_DURATION_MIN = PARAMS["immunity_duration_min"]
+IMMUNITY_DURATION_MAX = PARAMS["immunity_duration_max"]
 # constants pertaining to the simulation, such as
 #       grid dimensions
 NUM_ROWS_FULL = PARAMS["num_row"]+2

@@ -7,7 +7,7 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
 from random import random, randint, seed
 from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
-    MAX_EXPOSURE
+    MAX_EXPOSURE, IS_SLIS, IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX
 
 class Individual:
     '''
@@ -47,6 +47,8 @@ class Individual:
         self.days_in_latent = randint(LATENT_PERIOD_MIN, LATENT_PERIOD_MAX)
         # number of days this individual will suffer in the infectious stage of the disease
         self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN, INFECTIOUS_PERIOD_MAX)
+        # number of days this individual will retain immunity from the disease
+        self.immunity_duration = randint(IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX)
         # doing this prevents the initially infected individuals from having exposure points
         #       (saves a teensy bit of memory)
         if state != 2:
@@ -105,6 +107,10 @@ class Individual:
         # if infectious, check if they have stayed the infectious period or not
         elif self.state_of_health == 2:
             self.check_if_removed()
+        # if the simulation models the SLIS disease progression model
+        if IS_SLIS:
+            if self.state_of_health == 3:
+                self.check_if_susceptible_again()
 
     def check_if_latent(self, num_exposure_points):
         """
@@ -127,6 +133,14 @@ class Individual:
         """
         if self.days_in_state == self.days_in_infectious:
             self.change = True
+    
+    def check_if_susceptible_again(self):
+        """
+        checks if the individual has stayed in the recovered stage long enough to lose immunity and
+                thereby return to the susceptible stage
+        """
+        if self.days_in_state == self.immunity_duration:
+            self.change = True
 
     def apply_changes(self, spot):
         """
@@ -134,12 +148,15 @@ class Individual:
         Returns: the integer representing the individual's state of health
         """
         if not self.updated:
+            # transition the individual to the next state
             if self.change:
                 self.days_in_state = 0
-                self.state_of_health += 1
+                self.state_of_health += 1 % 4
                 self.change = False
+            # move the individual around the grid to their tendency location
             if spot != self.tendency:
                 self.select_new_location(spot)
+            # if individual has reached their desired location (tendency), make a new one
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
                 self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
