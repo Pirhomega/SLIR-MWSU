@@ -49,11 +49,8 @@ class Individual:
         self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN, INFECTIOUS_PERIOD_MAX)
         # number of days this individual will retain immunity from the disease
         self.immunity_duration = randint(IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX)
-        # doing this prevents the initially infected individuals from having exposure points
-        #       (saves a teensy bit of memory)
-        if state != 2:
-            # number of exposure points for this individual
-            self.exposure_points = 0.0
+        # number of exposure points for this individual
+        self.exposure_points = 0.0
         # the fact the individual does or does not wear a mask when they know they're infected
         self.mask_wearer = bool(random() < MASK_CHANCE)
         # the factor that, when multiplied by the exposure_points to be added to an individual,
@@ -151,7 +148,7 @@ class Individual:
             # transition the individual to the next state
             if self.change:
                 self.days_in_state = 0
-                self.state_of_health += 1 % 4
+                self.state_of_health = (self.state_of_health + 1) % 4
                 self.change = False
             # move the individual around the grid to their tendency location
             if spot != self.tendency:

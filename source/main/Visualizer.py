@@ -29,7 +29,7 @@ class Visualizer():
 
     # each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by
     # taking the square root of the number of individuals in the spot and taking the ceiling of the result. That value will be N.
-    def visualize(self, sim_matrices):
+    def visualize(self, sim_grid):
         # we don't want to make any changes to the base canvas, which is a black square image.
         #       If we didn't make a copy to modify, the state from the day before would be visible
         #       on the following day (i.e. not good)
@@ -43,7 +43,7 @@ class Visualizer():
             for col in range(1, ITERATOR_LIMIT):
                 # Each cell of the simulation grid can hold multiple individuals. Therefore, we
                 #       need to find the new size of each tile so we can fit them all in that cell.
-                N = ceil(sqrt(max(1, len(sim_matrices[row][col]))))
+                N = ceil(sqrt(max(1, len(sim_grid[row][col]))))
                 mini_tile_size = int(default_tile_size / N)
                 # print("This is N:", N)
                 # print("This is mini_tile_size", mini_tile_size)
@@ -51,7 +51,7 @@ class Visualizer():
                 mini_row = 0
                 mini_col = 0
                 # for each individual in this cell, paste the correct tile in
-                for individual in sim_matrices[row][col]:
+                for individual in sim_grid[row][col]:
                     tile = self.tiles[individual.state_of_health].resize((mini_tile_size, mini_tile_size))
                     # if we've filled a row inside the cell, jump to the beginning of the next row
                     if mini_col == N:

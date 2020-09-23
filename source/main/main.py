@@ -18,8 +18,10 @@ from Visualizer import Visualizer
 from constants import PARAMS, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
 
 # the 2D simulation grid
-# sim_matrices = zeros((NUM_ROWS_FULL, NUM_COLS_FULL), dtype=object)
-sim_matrices = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
+sim_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
+
+# the 2D simulation grid's sister grid, the one that holds the exposure points for each cell
+expo_points_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
 def main():
@@ -39,7 +41,7 @@ def main():
     # initialize all grids to be empty lists
     for a in range(NUM_ROWS_FULL):
         for b in range(NUM_COLS_FULL):
-            sim_matrices[a][b] = []
+            sim_grid[a][b] = []
 
     # These following two while loops will only place individuals randomly in the grid so as to leave
     #       a border of empty lists around the grid's outside. E.G.
@@ -63,7 +65,7 @@ def main():
         # create an Individual object with its identifier, age, their age's mortality rate, and state
         age = choices(ages, age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
-        sim_matrices[randx][randy].append(Individual(individual_counter, int(age), age_chance, 2, (randx, randy)))
+        sim_grid[randx][randy].append(Individual(individual_counter, int(age), age_chance, 2, (randx, randy)))
         y -= 1
         individual_counter += 1
 
@@ -76,7 +78,7 @@ def main():
         # create an Individual object with its identifier, age, their age's mortality rate, and state
         age = choices(ages, age_weights)[0]
         age_chance = PARAMS["age_dist_disease"][age]
-        sim_matrices[randx][randy].append(Individual(individual_counter, int(age), age_chance, 0, (randx, randy)))
+        sim_grid[randx][randy].append(Individual(individual_counter, int(age), age_chance, 0, (randx, randy)))
         y -= 1
         individual_counter += 1
 
@@ -89,31 +91,34 @@ def main():
     with open(OUTPUT_FOLDER+"/CAoutput.csv", 'w') as outfile:
         # used to find how much time it takes to create each day's image
         debug_timer_vis = 0.0
+        # instantiate visualizer class to create gif of simulation if the user wants
         if MAKE_GIF:
-            # instantiate visualizer class to create gif of simulation
             sim_gif = Visualizer()
         # length of simulation in days
         num_days = 0
         # output the csv file headers
         outfile.write("day,susceptible,latent,infectious,recovered\n")
         
-        # loop until there are no individuals in the latent nor infectious stages
-        while num_days < 200 or (state_list[1] or state_list[2]):
-            print("Day", num_days)
+        # loop at least 200 days and until there are no individuals in the latent nor infectious stages
+        while num_days < 1000 and (state_list[1] or state_list[2]):
+            print("Processing day", num_days)
             # outputs the beginning-of-day state of the grid to csv output file
             outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
             # resets the counters for each state of health category in `state_list`
             state_list = [0, 0, 0, 0]
+            # Calculate each `sim_grid` cell's exposure point total and store in `expo_points_grid`
+            calculate_expo_total()
             # loop through entire grid using these top two nested for loops
             for row in range(1, ITERATOR_LIMIT):
                 for col in range(1, ITERATOR_LIMIT):
                     # traverse the list of individuals "sitting" in this particular grid location
-                    for individual in sim_matrices[row][col]:
+                    for individual in sim_grid[row][col]:
                         # if the individual is not susceptible, there's no need to check their neighbors
                         #       to see how many exposure points they'll be getting. But since the
-                        #       method `flag_for_update` requires parameter, just give it zero
-                        num_exposure_points = 0
-                        # however, if the individual is susceptible, make the call to `check_neighbors`
+                        #       method `flag_for_update` requires a parameter, just give it zero
+                        num_exposure_points = 0.0
+                        # however, if the individual is susceptible (their state of health is '0', 
+                        #       hence the 'not' in the if statement), make the call to `check_neighbors`
                         if not individual.state_of_health:
                             num_exposure_points = checkNeighbors((row, col))
                         # analyze the individual's state of health and set for updating if necessary
@@ -123,24 +128,24 @@ def main():
             for row in range(1, ITERATOR_LIMIT):
                 for col in range(1, ITERATOR_LIMIT):
                     # `individual_count` is the number of individuals in the current spot in the simulation grid.
-                    #       I tried using the `for individual in sim_matrices[row][col]`, but when I think when I
+                    #       I tried using the `for individual in sim_grid[row][col]`, but when I think when I
                     #       try to remove an individual from the list to move them to their next location in the sim grid,
                     #       the loop doesn't evaluate any other individual's in the list because it thinks it has already
                     #       reached the end of it. Like, when there's two individuals in the list, I update the first one's object variables,
                     #       move it to its next location, leaving the second one waiting to be looped over. The for loop only sees one
                     #       element left, so it thinks it has already evaluated it. Get the point? No? Oh well.
                     x = 0
-                    while x < len(sim_matrices[row][col]):
-                        results = sim_matrices[row][col][x].apply_changes((row, col))
+                    while x < len(sim_grid[row][col]):
+                        results = sim_grid[row][col][x].apply_changes((row, col))
                         # update the object variables of the individual and add them to the state_list tally if they haven't already
                         if results != -1:
                             state_list[results] += 1
                         # only copy to and remove an individual if they didn't move to a different location in the grid
-                        if sim_matrices[row][col][x].location != (row, col):
+                        if sim_grid[row][col][x].location != (row, col):
                             # append them to the list in their new location
-                            sim_matrices[sim_matrices[row][col][x].location[0]][sim_matrices[row][col][x].location[1]].append(sim_matrices[row][col][x])
+                            sim_grid[sim_grid[row][col][x].location[0]][sim_grid[row][col][x].location[1]].append(sim_grid[row][col][x])
                             # remove them from the list in their old location
-                            sim_matrices[row][col].remove(sim_matrices[row][col][x])
+                            sim_grid[row][col].remove(sim_grid[row][col][x])
                             x -= 1
                         x += 1
             num_days += 1
@@ -150,7 +155,7 @@ def main():
                 # create an image the simulation state and append to a list of images to later
                 #       turn into a gif
                 debug_start_timer = time()
-                sim_gif.visualize(sim_matrices)
+                sim_gif.visualize(sim_grid)
                 # images.append(visualize(canvas.copy()))
                 debug_timer_vis += time() - debug_start_timer
         # output the last day's numbers to csv file
@@ -169,37 +174,38 @@ def main():
 #                                              FUNCTIONS
 ###################################################################################################
 
+# runs through each cell in `sim_grid`, iterating through each individual found in the cell,
+#       and summing the exposure points, storing the result in the identical row and column
+#       in `expo_points_grid`. This strategy uses more memory than an earlier one which, for
+#       every individual in the `sim_grid`, recalculated the exposure points sum for a neighboring
+#       cell N times (where N is the number of susceptible individuals in the cell). That's a lot
+#       of wasted CPU time.
+def calculate_expo_total():
+    # loop through entire simulation grid, i.e. every individual
+    for row in range(1, ITERATOR_LIMIT):
+        for col in range(1, ITERATOR_LIMIT):
+            num_exposure_points = 0.0
+            for person in sim_grid[row][col]:
+                # if the individual is both infectious and not isolating
+                #       add their exposure points to the sum
+                if person.state_of_health == 2 and not person.quarantiner:
+                    num_exposure_points += (person.exposure_points_factor)
+            # store exposure points for the cell in `expo_points_grid`
+            expo_points_grid[row][col] = num_exposure_points
+
 # count how many infectious neighbors an individual has
 def checkNeighbors(location):
-    num_exposure_points = 0
+    row, col = location
+    # grab the exposure points from the individuals in the same cell (they count too)
+    #       (yeah yeah I know this isn't strictly von Neumann or whatever deal with it)
+    num_exposure_points = expo_points_grid[row][col]
     # if using the von Neumann method, just check the north, south, east, and west neighbors
-    for person in sim_matrices[location[0]][location[1]+1]:
-        # if the individual is both infectious and not isolating
-        if person.state_of_health == 2 and not person.quarantiner:
-            num_exposure_points += (1.0 * person.exposure_points_factor)
-    for person in sim_matrices[location[0]-1][location[1]]:
-        if person.state_of_health == 2 and not person.quarantiner:
-            num_exposure_points += (1.0 * person.exposure_points_factor)
-    for person in sim_matrices[location[0]][location[1]-1]:
-        if person.state_of_health == 2 and not person.quarantiner:
-            num_exposure_points += (1.0 * person.exposure_points_factor)
-    for person in sim_matrices[location[0]+1][location[1]]:
-        if person.state_of_health == 2 and not person.quarantiner:
-            num_exposure_points += (1.0 * person.exposure_points_factor)
-    # if using the Moore method, consider the corner neighbors as well as the von Neumann ones
+    num_exposure_points += expo_points_grid[row][col+1] + expo_points_grid[row-1][col] + \
+                                expo_points_grid[row][col-1] + expo_points_grid[row+1][col]
+    # if using the Moore method, add the corner neighbors exposure points to the von Neumann ones
     if not CONTACT_TYPE:
-        for person in sim_matrices[location[0]-1][location[1]+1]:
-            if person.state_of_health == 2 and not person.quarantiner:
-                num_exposure_points += (1.0 * person.exposure_points_factor)
-        for person in sim_matrices[location[0]-1][location[1]-1]:
-            if person.state_of_health == 2 and not person.quarantiner:
-                num_exposure_points += (1.0 * person.exposure_points_factor)
-        for person in sim_matrices[location[0]+1][location[1]-1]:
-            if person.state_of_health == 2 and not person.quarantiner:
-                num_exposure_points += (1.0 * person.exposure_points_factor)
-        for person in sim_matrices[location[0]+1][location[1]+1]:
-            if person.state_of_health == 2 and not person.quarantiner:
-                num_exposure_points += (1.0 * person.exposure_points_factor)
+        num_exposure_points += expo_points_grid[row-1][col+1] + expo_points_grid[row-1][col-1] + \
+                                expo_points_grid[row+1][col-1] + expo_points_grid[row+1][col+1]
     return num_exposure_points
 
 ####################################################################################
@@ -210,12 +216,15 @@ def debug_print():
     for x in range(NUM_COLS_FULL):
         for y in range(NUM_ROWS_FULL):
             print('[', end='')
-            for individual in sim_matrices[x][y]:
+            for individual in sim_grid[x][y]:
                 print(individual.state_of_health, end=',')
             print(']', end='')
         print('\n')
     print('-------------------------------')
 
+####################################################################################
+#                                   WHERE IT STARTS                                #
+####################################################################################
 
 # the `int main()` of the program
 if __name__ == "__main__":
