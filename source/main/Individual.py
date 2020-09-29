@@ -35,7 +35,8 @@ class Individual:
         self.id = iden
         # individual's age
         self.age = age
-        # will the individual die when they enter the recovered stage?
+        # if a random number is lower than the mortality rate of the individual's age group
+        #       they will die when recovered.
         self.die_when_recovered = bool(random() < mortality)
         # individual's current location in the simulation grid
         self.location = location

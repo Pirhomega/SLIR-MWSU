@@ -1,26 +1,32 @@
 {
-    "num_row":100,
-    "num_col":100,
-    "init_infected":100,
+    "num_row":77,
+    "num_col":77,
+    "init_infected":5,
     "population":6000,
     "age_dist": {
-        "24":0.399,
-        "44":0.293,
-        "64":0.186,
-        "84":0.122
+        "17":0.006,
+        "19":0.224,
+        "21":0.240,
+        "24":0.213,
+        "29":0.121,
+        "34":0.064,
+        "35":0.133
     },
     "age_dist_disease": {
+        "17":0.00203,
+        "19":0.00203,
+        "21":0.00203,
         "24":0.00203,
-        "44":0.0274,
-        "64":0.178,
-        "84":0.79257
+        "29":0.0274,
+        "34":0.0274,
+        "35":0.0274
     },
-    "latent_period_min":4,
-    "latent_period_max":6,
+    "latent_period_min":0,
+    "latent_period_max":1,
     "infectious_period_min":10,
     "infectious_period_max":14,
-    "max_exposure": 2,
-    "mask_wearer": 0.84,
+    "max_exposure": 1,
+    "mask_wearer": 0.9,
     "separator": 0.99,
     "symptomatic": 0.60,
 
@@ -28,8 +34,9 @@
     "SLIS": true,
     "immunity_duration_min": 90,
     "immunity_duration_max": 150,
+    "sim_max": 1000,
     
     "resources":"./resources",
     "output":"./source/output",
-    "visualize": false
+    "visualize": true
 }

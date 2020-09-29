@@ -26,6 +26,7 @@ SYMP_CHANCE = PARAMS["symptomatic"]
 CONTACT_TYPE = PARAMS["vonNeumann"]
 MAKE_GIF = PARAMS["visualize"]
 IS_SLIS = PARAMS["SLIS"]
+SIM_MAX = PARAMS["sim_max"]
 IMMUNITY_DURATION_MIN = PARAMS["immunity_duration_min"]
 IMMUNITY_DURATION_MAX = PARAMS["immunity_duration_max"]
 # constants pertaining to the simulation, such as

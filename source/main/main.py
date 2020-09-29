@@ -1,3 +1,4 @@
+#!~/miniconda/python.exe
 ###################################################################################################
 
 # Cellular Automata SLIR Simulation
@@ -15,7 +16,7 @@ from time import time
 # from numpy import zeros
 from Individual import Individual
 from Visualizer import Visualizer
-from constants import PARAMS, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
+from constants import PARAMS, SIM_MAX, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
 
 # the 2D simulation grid
 sim_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
@@ -100,8 +101,8 @@ def main():
         outfile.write("day,susceptible,latent,infectious,recovered\n")
         
         # loop at least 200 days and until there are no individuals in the latent nor infectious stages
-        while num_days < 1000 and (state_list[1] or state_list[2]):
-            print("Processing day", num_days)
+        while num_days < SIM_MAX and (state_list[1] or state_list[2]):
+            print("Processing day", num_days, end='\r', flush=True)
             # outputs the beginning-of-day state of the grid to csv output file
             outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','+str(state_list[2])+','+str(state_list[3])+'\n')
             # resets the counters for each state of health category in `state_list`
@@ -161,14 +162,15 @@ def main():
         # output the last day's numbers to csv file
         outfile.write(str(num_days)+','+str(state_list[0])+','+str(state_list[1])+','\
             +str(state_list[2])+','+str(state_list[3])+'\n')
+        print("Finished mathematical portion of simulation.")
         print("Output dumped to .csv file in `output` folder.")
         if MAKE_GIF:
             print("Preparing the .gif of the simulation.")
             debug_start_timer = time()
-            sim_gif.finish_and_save_gif()
+            # we do `num_days+1` to include the last day's simulation state
+            sim_gif.finish_and_save_gif(num_days)
             debug_timer_vis += time() - debug_start_timer
-            print("The visualizations took", debug_timer_vis)
-        print("Simulation finished!")
+            print("The visualization processing took", debug_timer_vis, "seconds")
 
 ###################################################################################################
 #                                              FUNCTIONS
@@ -233,4 +235,4 @@ if __name__ == "__main__":
     # start the simulation
     main()
     # find the total execution time
-    print("Entire simulation took", time() - debug_timer)
+    print("Entire simulation took", time() - debug_timer, "seconds")

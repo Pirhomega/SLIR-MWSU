@@ -1,6 +1,9 @@
-from constants import RESOURCES_FOLDER, OUTPUT_FOLDER, ITERATOR_LIMIT, GRID_SIZE
 from math import ceil, sqrt
+from os import mkdir, scandir
+from shutil import rmtree
 from PIL import Image
+from imageio import get_writer, imread
+from constants import RESOURCES_FOLDER, OUTPUT_FOLDER, ITERATOR_LIMIT, GRID_SIZE
 # from wand.image import Image
 
 class Visualizer():
@@ -20,12 +23,15 @@ class Visualizer():
         #       defining image that will signifiy the beginning of the gif if looped
         #       infinitely
         self.canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
-        self.images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
+        # self.images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
         self.tiles = [Image.open(RESOURCES_FOLDER+"/0.png"),
                         Image.open(RESOURCES_FOLDER+"/1.png"),
                         Image.open(RESOURCES_FOLDER+"/2.png"),
                         Image.open(RESOURCES_FOLDER+"/3.png"),
                         Image.open(RESOURCES_FOLDER+"/4.png")]
+        self.image_num = 0
+        self.temp_image_folder = OUTPUT_FOLDER+"/days/"
+        mkdir(self.temp_image_folder)
 
     # each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by
     # taking the square root of the number of individuals in the spot and taking the ceiling of the result. That value will be N.
@@ -63,13 +69,19 @@ class Visualizer():
                             (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                     mini_col += 1
         # save the changes made to the image
-        canvas_copy.save(OUTPUT_FOLDER+"/final_sim_state.png", quality=95)
+        canvas_copy.save(OUTPUT_FOLDER+"/days/"+str(self.image_num)+".png", quality=95)
+        self.image_num += 1
         # append the day's state to the list of day states
-        self.images.append(canvas_copy)
+        # self.images.append(canvas_copy)
 
-    def finish_and_save_gif(self):
+    def finish_and_save_gif(self, num_days):
         # use this to fix memory errors: https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
         # save the list of simulation images as a gif
-        self.images[0].save(OUTPUT_FOLDER+'/simulation.gif', save_all=True, append_images=self.images[1:], \
-            duration=200, loop=0)
-        
+        with get_writer(OUTPUT_FOLDER+'/simulation.gif', mode='I') as writer:
+            image = imread(RESOURCES_FOLDER+'/beginning.png')
+            writer.append_data(image)
+            for filename in range(num_days):
+                image = imread(self.temp_image_folder+str(filename)+'.png')
+                writer.append_data(image)
+                print("Processed day", filename, end='\r', flush=True)
+        rmtree(self.temp_image_folder)
