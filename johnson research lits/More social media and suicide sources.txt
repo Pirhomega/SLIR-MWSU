@@ -1,0 +1,10 @@
+Social media and suicide articles and papers:
+- Social media in China transitioned to a more negative emotional state after Chinese COVID-19 declaration on Jan 20, 2020 (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7195057/)
+- Social media must be used carefully in the midst of a pandemic, as it is possible to spread misinformation that would negatively impact those with preexisting or COVID-19 related mental health issues (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7139250/)
+- Article claiming social media can be used for suicide forecasting and prevention (https://www.nature.com/articles/s41746-020-0287-6)
+- Predicting national suicide numbers withs ocial media data (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3632511/)
+- SEARCH QUERY ON GOOGLE SCHOLAR: "social media suicide depression prediction COVID-19"
+- Detecting changes in suicide content manifested in social media following celebrity suicides (https://dl.acm.org/doi/abs/10.1145/2700171.2791026)
+- Social media as a measurement tool of depression in populations (https://dl.acm.org/doi/pdf/10.1145/2464464.2464480)
+- COVID-19, unemployment, and suicide (https://www.thelancet.com/journals/lanpsy/article/PIIS2215-0366(20)30141-3/fulltext)
+- 
