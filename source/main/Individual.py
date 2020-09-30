@@ -4,10 +4,11 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
             See doc string for the class for more info
 """
 
-from random import random, randint, seed
+from random import random, randint, seed, choices
 from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
-    MAX_EXPOSURE, IS_SLIS, IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX
+    MAX_EXPOSURE, IS_SLIS, IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX, PATCHES, NUM_PATCHES, \
+    AGE_DIST_DISEASE
 
 class Individual:
     '''
@@ -26,22 +27,25 @@ class Individual:
     functions:  `flag_for_update`, `check_if_latent`, `check_if_infectious`, `check_if_removed`, `apply_changes`, 
                 `select_new_location`
     '''
-    def __init__(self, iden, age, mortality, state, location):
+    def __init__(self, iden, state, possible_ages, ages_dist):
         # sets the random generator seed
         seed(a=None, version=2)
         # can be 0 (susceptible), 1 (latent), 2 (infectious), 3 (recovered), or 4 (immune)
         self.state_of_health = state
         # unique identification number for this individual
         self.id = iden
-        # individual's age
-        self.age = age
+
+        # determine the individual's age
+        self.age = choices(possible_ages, ages_dist)[0]
         # if a random number is lower than the mortality rate of the individual's age group
         #       they will die when recovered.
-        self.die_when_recovered = bool(random() < mortality)
-        # individual's current location in the simulation grid
-        self.location = location
+        self.die_when_recovered = bool(random() < AGE_DIST_DISEASE[self.age])
+
+        # individual's initial location in the simulation grid.
+        self.location = self.chooseLocation()
         # location this individual wants to travel to eventually
-        self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
+        self.tendency = self.chooseLocation()
+
         # number of units of time this individual has spent in their current state
         self.days_in_state = 0
         # number of days this individual will suffer in the latent stage of the disease
@@ -66,6 +70,7 @@ class Individual:
         #       they'll isolate. But if they don't show symptoms, they won't know they're sick
         #       so they won't isolate"
         self.quarantiner = bool(random() < QUARAN_CHANCE) and bool(random() < SYMP_CHANCE)
+
         # signals a state change is necessary
         self.change = False
         # signals the individual has been moved from their previous location
@@ -157,7 +162,7 @@ class Individual:
             # if individual has reached their desired location (tendency), make a new one
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
-                self.tendency = (randint(1, NUM_ROWS_FULL-3), randint(1, NUM_COLS_FULL-3))
+                self.tendency = self.chooseLocation()
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
             return self.state_of_health
@@ -183,3 +188,14 @@ class Individual:
             elif dcol > 0:
                 new_spot_col = spot[1] - 1
             self.location = (new_spot_row, new_spot_col)
+    
+    def chooseLocation(self):
+        """
+        selects a random location in the simulation grid or within a patch, selected at random
+        """
+        # Select at random one of the patches to spawn in an initially infected Individual
+        randPatch = randint(0, NUM_PATCHES-1)
+        # adding 1 to each random integer bound accounts for the empty grid border the user doesn't see
+        randx = randint(PATCHES[str(randPatch)]["bounds"][0]+1, PATCHES[str(randPatch)]["bounds"][2]+1)
+        randy = randint(PATCHES[str(randPatch)]["bounds"][1]+1, PATCHES[str(randPatch)]["bounds"][3]+1)
+        return (randx, randy)

@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\Owner\\miniconda3\\python.exe"
+    "python.pythonPath": "C:\\Users\\Owner\\miniconda3\\python.exe",
+    "python.autoComplete.extraPaths": ["./source/main"],
+    "http.proxyAuthorization": null
 }

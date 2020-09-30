@@ -1,8 +1,8 @@
 {
-    "num_row":77,
-    "num_col":77,
+    "num_row":500,
+    "num_col":500,
     "init_infected":5,
-    "population":6000,
+    "population":200,
     "age_dist": {
         "17":0.006,
         "19":0.224,
@@ -35,6 +35,18 @@
     "immunity_duration_min": 90,
     "immunity_duration_max": 150,
     "sim_max": 1000,
+    "patches": {
+        "0": {
+            "name": "Dillard Business",
+            "bounds": [0, 0, 100, 100],
+            "exits": [50, 100]
+        },
+        "1": {
+            "name": "Bolin Hall",
+            "bounds": [399, 399, 499, 499],
+            "exits": [450, 499]
+        }
+},
     
     "resources":"./resources",
     "output":"./source/output",

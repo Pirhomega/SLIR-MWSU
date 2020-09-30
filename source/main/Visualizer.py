@@ -1,5 +1,5 @@
 from math import ceil, sqrt
-from os import mkdir, scandir
+from os import mkdir, scandir, path
 from shutil import rmtree
 from PIL import Image
 from imageio import get_writer, imread
@@ -31,6 +31,8 @@ class Visualizer():
                         Image.open(RESOURCES_FOLDER+"/4.png")]
         self.image_num = 0
         self.temp_image_folder = OUTPUT_FOLDER+"/days/"
+        if path.isdir(OUTPUT_FOLDER+"/days/"):
+            rmtree(self.temp_image_folder)
         mkdir(self.temp_image_folder)
 
     # each cell could be composed of an `NxN` grid to display all individuals in the spot. We will calculate the dimensions of the grid by

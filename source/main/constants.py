@@ -27,6 +27,7 @@ CONTACT_TYPE = PARAMS["vonNeumann"]
 MAKE_GIF = PARAMS["visualize"]
 IS_SLIS = PARAMS["SLIS"]
 SIM_MAX = PARAMS["sim_max"]
+AGE_DIST_DISEASE = PARAMS["age_dist_disease"]
 IMMUNITY_DURATION_MIN = PARAMS["immunity_duration_min"]
 IMMUNITY_DURATION_MAX = PARAMS["immunity_duration_max"]
 # constants pertaining to the simulation, such as
@@ -34,6 +35,10 @@ IMMUNITY_DURATION_MAX = PARAMS["immunity_duration_max"]
 NUM_ROWS_FULL = PARAMS["num_row"]+2
 NUM_COLS_FULL = PARAMS["num_col"]+2
 GRID_SIZE = PARAMS["num_row"]
+# locations in simulation grid where individuals will travel to and from
+PATCHES = PARAMS["patches"]
+# the number of patches in the simulation
+NUM_PATCHES = len(PATCHES)
 # variable that will keep any for-loops using it from traversing the border of a grid
 ITERATOR_LIMIT = NUM_ROWS_FULL-1
 

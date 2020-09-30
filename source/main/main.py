@@ -6,7 +6,7 @@
 # School and Mentors: Midwestern State University, Drs. Tina Johnson and Terry Griffin
 # Programmer: Corbin Matamoros
 # Program Description:
-#       This program uses the SLIR model to simulate disease spread at Midwestern State University.
+#       This program uses the SLIR and SLIS model to simulate disease spread at Midwestern State University.
 #       See the README.md and report.docx for more detail.
 
 ###################################################################################################
@@ -36,8 +36,6 @@ def main():
     #       num_recovered = 0
     #       state_list = [number_of_susceptible, number_of_latent, number_of_infectious, number_of_recovered]
     state_list = [PARAMS["population"] - PARAMS["init_infected"], 0, PARAMS["init_infected"], 0]
-    # used to give each individual in the population a unique ID
-    individual_counter = 1
 
     # initialize all grids to be empty lists
     for a in range(NUM_ROWS_FULL):
@@ -58,28 +56,24 @@ def main():
     for key in PARAMS["age_dist"]:
         ages.append(key)
         age_weights.append(PARAMS["age_dist"][key])
-    # disperse all initially infected individuals randomly throughout the grid
-    y = PARAMS["init_infected"]
-    while y > 0:
-        randx = randint(1, NUM_ROWS_FULL-2)
-        randy = randint(1, NUM_COLS_FULL-2)
-        # create an Individual object with its identifier, age, their age's mortality rate, and state
-        age = choices(ages, age_weights)[0]
-        age_chance = PARAMS["age_dist_disease"][age]
-        sim_grid[randx][randy].append(Individual(individual_counter, int(age), age_chance, 2, (randx, randy)))
-        y -= 1
+
+    # instantiate the initially infectious individuals and get them placed in the grid
+    num_init_infected = PARAMS["init_infected"]
+    # used to give each individual in the population a unique ID
+    individual_counter = 1
+    while num_init_infected > 0:
+        # create an Individual object with its identifier, their state of health state, the list of possible ages,
+        #       the age distributions, and the ratio of deaths for each age
+        infected_person = Individual(individual_counter, 2, ages, age_weights)
+        sim_grid[infected_person.location[0]][infected_person.location[1]].append(infected_person)
+        num_init_infected -= 1
         individual_counter += 1
 
-    # disperse all susceptible individuals (which is total population minus the initial infectious individuals)
-    #       randomly throughout the first grid but only place them in unoccupied locations
+    # instantiate the rest of the population (the susceptible individuals) and get them placed in the grid
     y = PARAMS["population"] - PARAMS["init_infected"]
     while y > 0:
-        randx = randint(1, NUM_ROWS_FULL-2)
-        randy = randint(1, NUM_COLS_FULL-2)
-        # create an Individual object with its identifier, age, their age's mortality rate, and state
-        age = choices(ages, age_weights)[0]
-        age_chance = PARAMS["age_dist_disease"][age]
-        sim_grid[randx][randy].append(Individual(individual_counter, int(age), age_chance, 0, (randx, randy)))
+        susceptible_person = Individual(individual_counter, 2, ages, age_weights)
+        sim_grid[susceptible_person.location[0]][susceptible_person.location[1]].append(susceptible_person)
         y -= 1
         individual_counter += 1
 
