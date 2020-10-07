@@ -1,0 +1,75 @@
+2020-08-31 - version 1.00
+
+2020-09-01 - version 1.01
+
++ Added "Individual" class and moved necessary code for this class from main
++ Added capability for individuals to move around the grid towards a randomly determined location, generating a new one when that location is reached
++ Added "Constants.py" script to hold all immmutable values from parameter file. Constants can be imported to any other script in the same module
++ Added state list to track numbers of susceptible, latent, infectious, and recovered individuals
++ Added output file to which each day's state list can be printed
+- Removed need for multiple grids from main.py; simulation can run with one NxN grid
+
+2020-09-13 - version 1.02
+
++ Added visualization functionality to display each day's state as a .png, where each cell with an Individual within will have a colored tile relative to the Individual's state of health
++ Changed code to be more organized
+
+2020-09-14 - version 1.03
+
++ Added resource and output folders as referenced values in the parameter file
++ Changed code to reflect above addition
++ Added documentation to "constants.py", "main.py", and "Individual.py"
++ Changed library importing strategy to only import used constructs and functions
+
+2020-09-14 - version 1.04
+
++ Added ability for Individuals to die and stop moving around the grid during a simulation
+
+2020-09-16 - version 1.05
+
++ Added vizualizer class with documentation and moved necessary code from main to that class
+
+2020-09-17 - version 1.06
+
++ Fixed incorrect calculation which caused more people to die from the disease than indicated in the parameter file
++ Changed exposure points data type from integer to float
++ Changed maximum grid size from a theoretical 1000 x 1000 to a theoretical 5000 x 5000
++ Added functionality that allows exposure points to be accumulated slower if neighboring Individuals are wearing masks
++ Added user capability to allow or disallow the program to create a .gif of the simulation
+
+2020-09-20 - version 1.07
+
++ Added a seed generation instruction for better RNG in the project
++ Added quarantining functionality to the project
++ Added quaratining ratio as a modifiable parameter in the parameter file
+
+2020-09-21 - version 1.08
+
++ Added functionality for modeling disease spread with the SLIRS (susceptible, latent, infectious, recovered, susceptible) model
++ Added immunity capability in Individuals to the parameter file
+
+2020-09-23 - version 1.081
+
++ Changed the simulation grid from a numpy 2D array to a python list of lists
++ Added separate matrix that stores each cell's total exposure points from the Individual's within the simulation grid cell
++ Changed current exposure points calculation function to reflect above addition
+- Removed caveat that doesn't create an exposure points class variable in Individual objects who are one of the initially infected
+
+2020-09-28 - version 1.082
+
++ Fixed memory-overconsumption bug that caused the program to crash when too much memory was being used to create the visualization .gif
++ Added a parameter to the parameter file that allows the user to set how many days the simulation can run (helpful when using SLIRS)
+
+2020-09-30 - version 1.083
+
++ Changed location of code that determines an Individual's age, mortality, and initial location from main.py to Individual.py
++ Changed code determining an Individual's location or desired location to be a callable method in the Individual class
++ Added initial support for patches (locations in the simulation grid where Individuals are allowed to enter through certain locations only)
+
+2020-10-07 - version 1.09
+
++ Added pathfinding functionality to Individuals
++ Added class to constants.py to support pathfinding
++ Added simple python script that creates an N x N grid of characters the user defines in the command line
++ Added print statements that inform user of simulation progress when executing
+

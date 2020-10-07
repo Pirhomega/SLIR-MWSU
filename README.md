@@ -1,18 +1,39 @@
 # SLIR-MWSU
 
-This project seeks to simulate disease spread in a student population using a cellular automaton
+This project seeks to develop a cellular automaton framework for disease simulation in a mixed population.
 
-## Quick and dirty directory map
+## Directory tree
 
-`main.py` is the actual project code
+```txt
+/SLIR-MWSU
+├── README.md
+├── .gitignore
+├── resources
+├────── images
+├── source
+├── output
+```
 
-`main_old.py` is a previous version of `main.py` that I use for personal reference
+## State of the project
 
-`params.json` is a set of parameters used by `main.py`. They range from the size of the cellular automaton grid and population size and age demographics to disease metrics like max and min latency period.
+|   #   | Function / Requirement | % Completed | Latest info |
+| :---: | ----------- | ---------------------- | ------- |
+|   1   | Simulation runs with SLIR model  | 100% |  Individuals follow model correctly |
+|   2   | Simulation runs with SLIS model  | 100% |  Individuals follow model correctly |
+|   3   | Individuals can pathfind  | 100% | Used library which pathfinds using A-star /
+Dijkstra's algorithm |
+|   4   | Population environment represented in simulation (obstacles, buildings, etc.)  | 50% | Uses .txt file to add obstacles and space in grid for Individuals to travel over |
+|   5   | Population demographics represented in simulation  | 100% | Users can create a dictionary of ages and the ratio of that age within the population |
+|   6   | Simulation grid can be set by user | 100% | User can modify grid length and width in parameter file      |
+|   7   | Multiple diseases can be simulated in one simulation  | 0% |  Updated parameter file to support multiple diseases     |
+|   8   | Infection possibility customizable for each disease  | 0% | Current implementation uses "exposure points." Updated implementation plans to replace with a percent chance |
+|   9   | Disease spread prevention measures incoporated (mask wearing, washing hands, quarantining, etc.) | 99% | User can control if an Individual will isolate or wear a mask when they know they're sick |
+|   10   | Disease can be accurately represented in simulation  | 80% | See change log for details |
+|   11   | Project adheres to cellular automaton behavior  | 100% | Individuals in a cell are only affected by their neighboring cells |
+|   12   | Disease spread progress can be visualized | 100% | uses PIL to visualize disease spread throughout entire simulation using .gif |
+|   13   | Disease parameters can be modified by the user | 100% | parameter file is modifiable by user |
 
-## Current state of the project
 
-Need documentation and some features still need to be added. Visualization now errors out because of using too much memory. Fixing later.
 
 ## Errors and hiccups I ran into
 

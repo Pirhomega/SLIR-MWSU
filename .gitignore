@@ -1,0 +1,5 @@
+.vscode/
+tempMulti/
+*.pdf
+*.docx
+__pycache__/
