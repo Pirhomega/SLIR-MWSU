@@ -22,16 +22,16 @@ class Visualizer():
         #       appending each modified image to `images`. `images` starts with a 
         #       defining image that will signifiy the beginning of the gif if looped
         #       infinitely
-        self.canvas = Image.open(RESOURCES_FOLDER+"/bkgd.png")
+        self.canvas = Image.open(RESOURCES_FOLDER+"bkgd.png")
         # self.images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
-        self.tiles = [Image.open(RESOURCES_FOLDER+"/0.png"),
-                        Image.open(RESOURCES_FOLDER+"/1.png"),
-                        Image.open(RESOURCES_FOLDER+"/2.png"),
-                        Image.open(RESOURCES_FOLDER+"/3.png"),
-                        Image.open(RESOURCES_FOLDER+"/4.png")]
+        self.tiles = [Image.open(RESOURCES_FOLDER+"0.png"),
+                        Image.open(RESOURCES_FOLDER+"1.png"),
+                        Image.open(RESOURCES_FOLDER+"2.png"),
+                        Image.open(RESOURCES_FOLDER+"3.png"),
+                        Image.open(RESOURCES_FOLDER+"4.png")]
         self.image_num = 0
-        self.temp_image_folder = OUTPUT_FOLDER+"/days/"
-        if path.isdir(OUTPUT_FOLDER+"/days/"):
+        self.temp_image_folder = OUTPUT_FOLDER+"days/"
+        if path.isdir(OUTPUT_FOLDER+"days/"):
             rmtree(self.temp_image_folder)
         mkdir(self.temp_image_folder)
 

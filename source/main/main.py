@@ -1,7 +1,7 @@
 #!~/miniconda/python.exe
 ###################################################################################################
 
-# Cellular Automata SLIR Simulation
+# Cellular Automata SLIR Simulation Framework
 # Fall 20202
 # School and Mentors: Midwestern State University, Drs. Tina Johnson and Terry Griffin
 # Programmer: Corbin Matamoros
@@ -20,9 +20,11 @@ from constants import PARAMS, SIM_MAX, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FU
 
 # the 2D simulation grid
 sim_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
+print("Created main simulation grid")
 
 # the 2D simulation grid's sister grid, the one that holds the exposure points for each cell
 expo_points_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
+print("Created exposure points grid")
 
 # the `if __name__ == "__main__":` at the very bottom of this script calls this function
 def main():
@@ -41,6 +43,7 @@ def main():
     for a in range(NUM_ROWS_FULL):
         for b in range(NUM_COLS_FULL):
             sim_grid[a][b] = []
+    print("Initialized main simulation grid")
 
     # These following two while loops will only place individuals randomly in the grid so as to leave
     #       a border of empty lists around the grid's outside. E.G.
@@ -72,29 +75,32 @@ def main():
     # instantiate the rest of the population (the susceptible individuals) and get them placed in the grid
     y = PARAMS["population"] - PARAMS["init_infected"]
     while y > 0:
-        susceptible_person = Individual(individual_counter, 2, ages, age_weights)
+        susceptible_person = Individual(individual_counter, 0, ages, age_weights)
         sim_grid[susceptible_person.location[0]][susceptible_person.location[1]].append(susceptible_person)
         y -= 1
         individual_counter += 1
-
+    print("Populated main simulation grid with initially infected and susceptible Individuals")
 ##############################################################################################################
 #                                              MAIN SIMULATION BLOCK
 ##############################################################################################################
 
     # main simulation block
     # open a 'csv' file for outputting the daily reports, explained later
-    with open(OUTPUT_FOLDER+"/CAoutput.csv", 'w') as outfile:
+    with open(OUTPUT_FOLDER+"CAoutput.csv", 'w') as outfile:
         # used to find how much time it takes to create each day's image
         debug_timer_vis = 0.0
         # instantiate visualizer class to create gif of simulation if the user wants
         if MAKE_GIF:
+            print("Instantiating visualizer object")
             sim_gif = Visualizer()
+            print("Complete")
         # length of simulation in days
         num_days = 0
         # output the csv file headers
         outfile.write("day,susceptible,latent,infectious,recovered\n")
         
-        # loop at least 200 days and until there are no individuals in the latent nor infectious stages
+        print("Beginning simulation")
+        # loop at least SIM_MAX days and until there are no individuals in the latent nor infectious stages
         while num_days < SIM_MAX and (state_list[1] or state_list[2]):
             print("Processing day", num_days, end='\r', flush=True)
             # outputs the beginning-of-day state of the grid to csv output file

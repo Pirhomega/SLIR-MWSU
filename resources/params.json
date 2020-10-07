@@ -1,54 +1,67 @@
 {
-    "num_row":500,
-    "num_col":500,
-    "init_infected":5,
-    "population":200,
-    "age_dist": {
-        "17":0.006,
-        "19":0.224,
-        "21":0.240,
-        "24":0.213,
-        "29":0.121,
-        "34":0.064,
-        "35":0.133
-    },
-    "age_dist_disease": {
-        "17":0.00203,
-        "19":0.00203,
-        "21":0.00203,
-        "24":0.00203,
-        "29":0.0274,
-        "34":0.0274,
-        "35":0.0274
-    },
-    "latent_period_min":0,
-    "latent_period_max":1,
-    "infectious_period_min":10,
-    "infectious_period_max":14,
-    "max_exposure": 1,
-    "mask_wearer": 0.9,
-    "separator": 0.99,
-    "symptomatic": 0.60,
-
-    "vonNeumann": true,
-    "SLIS": true,
-    "immunity_duration_min": 90,
-    "immunity_duration_max": 150,
-    "sim_max": 1000,
-    "patches": {
-        "0": {
-            "name": "Dillard Business",
-            "bounds": [0, 0, 100, 100],
-            "exits": [50, 100]
+    "simulation": {
+        "num_row":100,
+        "num_col":100,
+        "population":5,
+        "age_dist": {
+            "17":0.006,
+            "19":0.224,
+            "21":0.240,
+            "24":0.213,
+            "29":0.121,
+            "34":0.064,
+            "35":0.133
         },
-        "1": {
-            "name": "Bolin Hall",
-            "bounds": [399, 399, 499, 499],
-            "exits": [450, 499]
+        "max_exposure": 1,
+        "mask_wearer": 0.9,
+        "separator": 0.99,
+        "sim_max": 1000,
+        "patches": {
+            "0": {
+                "name": "Dillard Business",
+                "bounds": [2, 8, 14, 41],
+                "exits": [2, 24, 2, 25, 14, 24, 14, 25, 7, 8, 8, 8, 7, 40, 8, 40] 
+            },
+            "1": {
+                "name": "Bolin Hall",
+                "bounds": [28, 62, 36, 88],
+                "exits": [36, 75, 36, 76]
+            },
+            "2": {
+                "name": "Mccoy College",
+                "bounds": [48, 5, 58, 30],
+                "exits": [52, 5, 53, 5]
+            },
+            "3": {
+                "name": "Protho Yeager",
+                "bounds": [82, 44, 95, 76],
+                "exits": [82, 59, 82, 60, 95, 59, 95, 60]
+            }
         }
-},
-    
-    "resources":"./resources",
-    "output":"./source/output",
-    "visualize": true
+    },
+    "0": {
+        "init_infected":1,
+        "age_dist_disease": {
+            "17":0.00203,
+            "19":0.00203,
+            "21":0.00203,
+            "24":0.00203,
+            "29":0.0274,
+            "34":0.0274,
+            "35":0.0274
+        },
+        "latent_period_min":10,
+        "latent_period_max":15,
+        "infectious_period_min":10,
+        "infectious_period_max":15,
+        "symptomatic": 0.60,
+
+        "vonNeumann": true,
+        "SLIS": false,
+        "immunity_duration_min": 90,
+        "immunity_duration_max": 150
+    },
+    "resources":"./resources/",
+    "output":"./source/output/",
+    "visualize": false
 }

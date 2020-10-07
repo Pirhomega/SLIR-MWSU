@@ -5,8 +5,11 @@
 
 # mine
 temp.txt
-./source/main/Visualizer_mag.py
 *.png
+main_old.py
+tempMulti/
+*.pdf
+RunSimLots.bat
 
 # User-specific files
 *.rsuser

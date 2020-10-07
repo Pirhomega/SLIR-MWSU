@@ -8,7 +8,7 @@ from random import random, randint, seed, choices
 from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
     INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
     MAX_EXPOSURE, IS_SLIS, IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX, PATCHES, NUM_PATCHES, \
-    AGE_DIST_DISEASE
+    AGE_DIST_DISEASE, terrain_grid
 
 class Individual:
     '''
@@ -45,6 +45,8 @@ class Individual:
         self.location = self.chooseLocation()
         # location this individual wants to travel to eventually
         self.tendency = self.chooseLocation()
+        self.path = terrain_grid.find_shortest_path(self.location,self.tendency)
+
 
         # number of units of time this individual has spent in their current state
         self.days_in_state = 0
@@ -153,16 +155,20 @@ class Individual:
         if not self.updated:
             # transition the individual to the next state
             if self.change:
-                self.days_in_state = 0
+                self.days_in_state = -1
                 self.state_of_health = (self.state_of_health + 1) % 4
                 self.change = False
-            # move the individual around the grid to their tendency location
-            if spot != self.tendency:
-                self.select_new_location(spot)
+            # move the individual to the next spot in the grid by assigning its position
+            #       as the first position in the `self.path` list
+            if self.path != []:
+                self.location = (self.path[0][1], self.path[0][0])
+                self.path.pop(0)
             # if individual has reached their desired location (tendency), make a new one
             else:
                 # changes the individual `self.tendency` to be a new location in the simulation grid
                 self.tendency = self.chooseLocation()
+                # find the next set of spots the Individual must use to get to their new location
+                self.path = terrain_grid.find_shortest_path(self.location, self.tendency)
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
             return self.state_of_health
