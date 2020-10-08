@@ -5,10 +5,7 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
 """
 
 from random import random, randint, seed, choices
-from constants import NUM_ROWS_FULL, NUM_COLS_FULL, LATENT_PERIOD_MAX, LATENT_PERIOD_MIN, \
-    INFECTIOUS_PERIOD_MAX, INFECTIOUS_PERIOD_MIN, MASK_CHANCE, QUARAN_CHANCE, SYMP_CHANCE, \
-    MAX_EXPOSURE, IS_SLIS, IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX, PATCHES, NUM_PATCHES, \
-    AGE_DIST_DISEASE, terrain_grid
+from constants import NUM_ROWS_FULL, NUM_COLS_FULL, DISEASE_LIST, PATCHES, NUM_PATCHES, terrain_grid
 
 class Individual:
     '''

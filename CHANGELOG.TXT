@@ -1,3 +1,10 @@
+UPCOMING CHANGES AS OF 2020-10-7
+
++ Add support for simultaneous simulation of multiple diseases
++ Add support for different kinds of Individuals (human and animal, like swine or birds)
+
+----------------------------------------------------------------------------------------------
+
 2020-08-31 - version 1.00
 
 2020-09-01 - version 1.01
@@ -72,4 +79,6 @@
 + Added class to constants.py to support pathfinding
 + Added simple python script that creates an N x N grid of characters the user defines in the command line
 + Added print statements that inform user of simulation progress when executing
-
++ Changed parameter file to support the simultaneous simulation of multiple diseases
++ Changed directory tree organization
++ Changed parameter file and its references in project code to reflect changed directory tree

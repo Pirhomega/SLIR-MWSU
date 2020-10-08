@@ -16,7 +16,7 @@ from time import time
 # from numpy import zeros
 from Individual import Individual
 from Visualizer import Visualizer
-from constants import PARAMS, SIM_MAX, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
+from constants import PARAMS, POPULATION, SIM_MAX, OUTPUT_FOLDER, NUM_ROWS_FULL, NUM_COLS_FULL, ITERATOR_LIMIT, CONTACT_TYPE, MAKE_GIF
 
 # the 2D simulation grid
 sim_grid = [([0] * NUM_COLS_FULL) for row in range(NUM_ROWS_FULL)]
@@ -37,7 +37,7 @@ def main():
     #       num_latent = 0
     #       num_recovered = 0
     #       state_list = [number_of_susceptible, number_of_latent, number_of_infectious, number_of_recovered]
-    state_list = [PARAMS["population"] - PARAMS["init_infected"], 0, PARAMS["init_infected"], 0]
+    state_list = [POPULATION - PARAMS["init_infected"], 0, PARAMS["init_infected"], 0]
 
     # initialize all grids to be empty lists
     for a in range(NUM_ROWS_FULL):
