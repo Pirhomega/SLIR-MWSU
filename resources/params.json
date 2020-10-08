@@ -53,12 +53,12 @@
             "latent_period_max":15,
             "infectious_period_min":10,
             "infectious_period_max":15,
-            "max_exposure": 1,
+            "transmission_rate": 1,
             "mask_wearer": 0.9,
             "separator": 0.99,
             "symptomatic": 0.60,
 
-            "vonNeumann": true,
+            "neighborhood": "same-cell",
             "SLIS": false,
             "immunity_duration_min": 90,
             "immunity_duration_max": 150

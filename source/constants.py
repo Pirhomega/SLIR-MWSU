@@ -27,11 +27,11 @@ for disease_num in PARAMS["diseases"]:
         "LATENT_PERIOD_MAX": PARAMS[disease_num]["latent_period_max"],
         "INFECTIOUS_PERIOD_MIN": PARAMS[disease_num]["infectious_period_min"],
         "INFECTIOUS_PERIOD_MAX": PARAMS[disease_num]["infectious_period_max"],
-        "MAX_EXPOSURE": PARAMS[disease_num]["max_exposure"],
+        "TRANS_RATE": PARAMS[disease_num]["max_exposure"],
         "MASK_CHANCE": PARAMS[disease_num]["mask_wearer"],
         "QUARAN_CHANCE": PARAMS[disease_num]["separator"],
         "SYMP_CHANCE": PARAMS[disease_num]["symptomatic"],
-        "CONTACT_TYPE": PARAMS[disease_num]["vonNeumann"],
+        "CONTACT_TYPE": PARAMS[disease_num]["neighborhood"],
         "IS_SLIS": PARAMS["SLIS"],
         "IMMUNITY_DURATION_MIN": PARAMS["immunity_duration_min"],
         "IMMUNITY_DURATION_MAX": PARAMS["immunity_duration_max"]
@@ -110,6 +110,7 @@ class Obstacle_grid():
 terrain_grid = Obstacle_grid()
 
 if __name__ == "__main__":
+    # unit tests
     grid = Obstacle_grid()
     path_list = grid.find_shortest_path((94,75),(3,9))
     grid.mark_path(path_list)
