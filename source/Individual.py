@@ -5,7 +5,7 @@ Purpose:    To separate the `Individual` class from the main code for easier rea
 """
 
 from random import random, randint, seed, choices
-from constants import NUM_ROWS_FULL, NUM_COLS_FULL, DISEASE_LIST, PATCHES, NUM_PATCHES, terrain_grid
+from constants import DISEASE_LIST, PATCHES, NUM_PATCHES, terrain_grid
 
 class Individual:
     '''
@@ -24,66 +24,99 @@ class Individual:
     functions:  `flag_for_update`, `check_if_latent`, `check_if_infectious`, `check_if_removed`, `apply_changes`, 
                 `select_new_location`
     '''
-    def __init__(self, iden, state, possible_ages, ages_dist):
+    """
+                     /$$           /$$   /$$                          
+                    |__/          |__/  | $$                          
+                    /$$ /$$$$$$$  /$$ /$$$$$$                        
+                    | $$| $$__  $$| $$|_  $$_/                        
+                    | $$| $$  \ $$| $$  | $$                          
+                    | $$| $$  | $$| $$  | $$ /$$                      
+                    | $$| $$  | $$| $$  |  $$$$/                      
+    /$$$$$$ /$$$$$$|__/|__/  |__/|__/   \___/   /$$$$$$ /$$$$$$      
+    |______/|______/                            |______/|______/
+    """
+    def __init__(self, iden, state, possible_ages, ages_dist, disease_type=0):
         # sets the random generator seed
         seed(a=None, version=2)
         # can be 0 (susceptible), 1 (latent), 2 (infectious), 3 (recovered), or 4 (immune)
-        self.state_of_health = state
+        self.state_of_health = [0] * len(DISEASE_LIST)
+        if state != 0:
+            self.state_of_health[disease_type] = state
+
         # unique identification number for this individual
         self.id = iden
 
         # determine the individual's age
-        self.age = choices(possible_ages, ages_dist)[0]
+        age = choices(possible_ages, ages_dist)[0]
         # if a random number is lower than the mortality rate of the individual's age group
         #       they will die when recovered.
-        self.die_when_recovered = bool(random() < AGE_DIST_DISEASE[self.age])
+        self.die_when_recovered = []
 
         # individual's initial location in the simulation grid.
         self.location = self.chooseLocation()
         # location this individual wants to travel to eventually
         self.tendency = self.chooseLocation()
+
+        # this instruction will take the bulk of the initialization time
         self.path = terrain_grid.find_shortest_path(self.location,self.tendency)
 
-
         # number of units of time this individual has spent in their current state
-        self.days_in_state = 0
-        # number of days this individual will suffer in the latent stage of the disease
-        self.days_in_latent = randint(LATENT_PERIOD_MIN, LATENT_PERIOD_MAX)
-        # number of days this individual will suffer in the infectious stage of the disease
-        self.days_in_infectious = randint(INFECTIOUS_PERIOD_MIN, INFECTIOUS_PERIOD_MAX)
-        # number of days this individual will retain immunity from the disease
-        self.immunity_duration = randint(IMMUNITY_DURATION_MIN, IMMUNITY_DURATION_MAX)
-        # number of exposure points for this individual
-        self.exposure_points = 0.0
-        # the fact the individual does or does not wear a mask when they know they're infected
-        self.mask_wearer = bool(random() < MASK_CHANCE)
+        self.days_in_state = [0] * len(DISEASE_LIST)
+        # number of days this individual will suffer in the latent stage of each disease
+        self.days_in_latent = []
+
+        # number of days this individual will suffer in the infectious stage of each disease
+        self.days_in_infectious = []
+
+        # number of days this individual will retain immunity from each disease
+        self.immunity_duration = []
+
         # the factor that, when multiplied by the exposure_points to be added to an individual,
-        #       determines if they get a reduced number or not. E.G. when an infected individual
-        #       is wearing a mask, they will have a reduced effect on the susceptible ones around
-        #       them.
-        self.exposure_points_factor = 1.0
-        if self.mask_wearer:
-            self.exposure_points_factor = 0.5
+        #   determines if they get a reduced number or not. E.G. when an infected individual
+        #   is wearing a mask, they will have a reduced effect on the susceptible ones around
+        #   them.
+        self.prevention_factor = []
         # the fact the individual does or does not quarantine when they know they're infected
-        #       'and-ing' with `bool(random() < SYMP_CHANCE)` says, "if the person knows they're sick,
-        #       they'll isolate. But if they don't show symptoms, they won't know they're sick
-        #       so they won't isolate"
-        self.quarantiner = bool(random() < QUARAN_CHANCE) and bool(random() < SYMP_CHANCE)
+        #   'and-ing' with `bool(random() < SYMP_CHANCE)` says, "if the person knows they're sick,
+        #   they'll isolate. But if they don't show symptoms, they won't know they're sick
+        #   so they won't isolate"
+        self.quarantiner = []
+        # the fact the individual will wear a mask when they know they are infected with a particular
+        #   disease
+        self.mask_wearer = []
+
+        # initialize all parameters that differ based on the disease for each disease
+        for disease in range(len(DISEASE_LIST)):
+            self.days_in_latent.append((randint(DISEASE_LIST[disease]["LATENT_PERIOD_MIN"], DISEASE_LIST[disease]["LATENT_PERIOD_MAX"])))
+            self.days_in_infectious.append((randint(DISEASE_LIST[disease]["INFECTIOUS_PERIOD_MIN"], DISEASE_LIST[disease]["INFECTIOUS_PERIOD_MAX"])))
+            self.immunity_duration.append((randint(DISEASE_LIST[disease]["IMMUNITY_DURATION_MIN"], DISEASE_LIST[disease]["IMMUNITY_DURATION_MAX"])))
+            self.die_when_recovered.append(bool(random() < DISEASE_LIST[disease]["AGE_DIST_DISEASE"][age]))
+            self.mask_wearer.append(bool(random() < DISEASE_LIST[disease]["MASK_CHANCE"]))
+            # if the statement in the if condition evaulates to True, the individual wears a mask
+            if bool(random() < DISEASE_LIST[disease]["MASK_CHANCE"]):
+                self.prevention_factor.append(0.5)
+            # otherwise, they don't wear one and suffer a higher chance of getting infected
+            else:
+                self.prevention_factor.append(1.0)
+            self.quarantiner = bool(random() < DISEASE_LIST[disease]["QUARAN_CHANCE"]) and bool(random() < DISEASE_LIST[disease]["SYMP_CHANCE"])
 
         # signals a state change is necessary
-        self.change = False
+        self.change = [False] * len(DISEASE_LIST)
         # signals the individual has been moved from their previous location
         self.updated = False
-        # print("ID:", self.id)
-        # print("Age:", self.age)
-        # print("State of health:", self.state_of_health)
-        # print("Chance of dying:", self.mortality*100, '%')
-        # print("Tendency:", self.tendency)
-        # print("Latent period:", self.days_in_latent)
-        # print("Infectious period:", self.days_in_infectious)
-        # print('\n')
 
-    def flag_for_update(self, num_exposure_points):
+    """
+     /$$$$$$$            /$$       /$$ /$$                 /$$      /$$             /$$     /$$                       /$$                
+    | $$__  $$          | $$      | $$|__/                | $$$    /$$$            | $$    | $$                      | $$                
+    | $$  \ $$ /$$   /$$| $$$$$$$ | $$ /$$  /$$$$$$$      | $$$$  /$$$$  /$$$$$$  /$$$$$$  | $$$$$$$   /$$$$$$   /$$$$$$$  /$$$$$$$      
+    | $$$$$$$/| $$  | $$| $$__  $$| $$| $$ /$$_____/      | $$ $$/$$ $$ /$$__  $$|_  $$_/  | $$__  $$ /$$__  $$ /$$__  $$ /$$_____/      
+    | $$____/ | $$  | $$| $$  \ $$| $$| $$| $$            | $$  $$$| $$| $$$$$$$$  | $$    | $$  \ $$| $$  \ $$| $$  | $$|  $$$$$$       
+    | $$      | $$  | $$| $$  | $$| $$| $$| $$            | $$\  $ | $$| $$_____/  | $$ /$$| $$  | $$| $$  | $$| $$  | $$ \____  $$      
+    | $$      |  $$$$$$/| $$$$$$$/| $$| $$|  $$$$$$$      | $$ \/  | $$|  $$$$$$$  |  $$$$/| $$  | $$|  $$$$$$/|  $$$$$$$ /$$$$$$$/      
+    |__/       \______/ |_______/ |__/|__/ \_______/      |__/     |__/ \_______/   \___/  |__/  |__/ \______/  \_______/|_______/  
+    """
+
+    def flag_for_update(self, is_infected):
         """
         Assess the individual's state of health and determine if they progress through the disease
             This means susceptible individuals will have their surroundings analyzed for number of infectious
@@ -98,63 +131,40 @@ class Individual:
         """
         self.updated = False
         # add one day to the individual's time in their current state
-        self.days_in_state += 1
-        # if they're susceptible, add the number of infectious individuals in their neighborhood to their
-        #       exposure point count
-        if self.state_of_health == 0:
-            self.check_if_latent(num_exposure_points)
-        # if they're in the latent stage, check if they have stayed the latent period or not
-        elif self.state_of_health == 1:
-            self.check_if_infectious()
-        # if infectious, check if they have stayed the infectious period or not
-        elif self.state_of_health == 2:
-            self.check_if_removed()
-        # if the simulation models the SLIS disease progression model
-        if IS_SLIS:
-            if self.state_of_health == 3:
-                self.check_if_susceptible_again()
+        self.days_in_state = [(current_count + 1) for current_count in self.days_in_state]
 
-    def check_if_latent(self, num_exposure_points):
-        """
-        checks if the individual has had enough exposures to become infected and join the latent stage
-        """
-        self.exposure_points += num_exposure_points
-        if self.exposure_points > MAX_EXPOSURE:
-            self.change = True
+        # checks if the individual has the necessary qualities to progress to the next
+        #   stage of the disease (if susceptible, then they would progress to the latent stage, etc.)
+        self.check_if_progressing(is_infected)
 
-    def check_if_infectious(self):
+    def check_if_progressing(self, is_infected):
         """
-        checks if the individual has stayed the duration of the latent period to become infectious
+        Purpose:    Sets the individual to transition to the next disease stage
         """
-        if self.days_in_state == self.days_in_latent:
-            self.change = True
-    
-    def check_if_removed(self):
-        """
-        checks if the individual has stayed the duration of the infectious period to become removed (dead or alive)
-        """
-        if self.days_in_state == self.days_in_infectious:
-            self.change = True
-    
-    def check_if_susceptible_again(self):
-        """
-        checks if the individual has stayed in the recovered stage long enough to lose immunity and
-                thereby return to the susceptible stage
-        """
-        if self.days_in_state == self.immunity_duration:
-            self.change = True
+        for disease in range(len(DISEASE_LIST)):
+            # if the individual has become infected as a susceptible, OR
+            #       if they have stayed the duration of the latent period, OR
+            #           if they have stayed the duration of the infectious period, OR
+            #               if they have stayed the duration of the immunity period,
+            #   set the `self.change` variable to True for them to move to the next stage
+            if (self.state_of_health[disease] == 0 and is_infected[disease]) or \
+                    (self.days_in_state[disease] == self.days_in_latent[disease]) or \
+                        (self.days_in_state[disease] == self.days_in_infectious[disease]) or \
+                            self.days_in_state[disease] == self.immunity_duration[disease]:
+                self.change[disease] = True
 
-    def apply_changes(self, spot):
+    def apply_changes(self):
         """
         Purpose: updates the state variables of the individual
         Returns: the integer representing the individual's state of health
         """
         if not self.updated:
-            # transition the individual to the next state
-            if self.change:
-                self.days_in_state = -1
-                self.state_of_health = (self.state_of_health + 1) % 4
-                self.change = False
+            for disease in range(len(DISEASE_LIST)):
+                # transition the individual to the next state
+                if self.change[disease]:
+                    self.days_in_state[disease] = -1
+                    self.state_of_health[disease] = (self.state_of_health[disease] + 1) % 4
+                    self.change[disease] = False
             # move the individual to the next spot in the grid by assigning its position
             #       as the first position in the `self.path` list
             if self.path != []:
@@ -169,15 +179,20 @@ class Individual:
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
             return self.state_of_health
-        # return a negative one to indicate this individual has already been updated for the current simulation day
         return -1
 
     def select_new_location(self, spot):
         """
-        moves the individual in the simulation grid
+        Purpose:    Moves the individual in the simulation grid
+        Input:      `spot`: 
         """
-        # only move the individual if they are not recovered OR if they are recovered but still alive
-        if (self.state_of_health != 3) or (self.state_of_health == 3 and not self.die_when_recovered):
+        can_move = False
+        for disease in range(len(DISEASE_LIST)):
+            # the individual can move if they are not recovered OR if they are recovered but still alive
+            if (self.state_of_health[disease] != 3) or (self.state_of_health[disease] == 3 and not self.die_when_recovered[disease]):
+                can_move = True
+
+        if can_move:
             new_spot_row = spot[0]
             new_spot_col = spot[1]
             drow = spot[0] - self.tendency[0]
@@ -202,3 +217,18 @@ class Individual:
         randx = randint(PATCHES[str(randPatch)]["bounds"][0]+1, PATCHES[str(randPatch)]["bounds"][2]+1)
         randy = randint(PATCHES[str(randPatch)]["bounds"][1]+1, PATCHES[str(randPatch)]["bounds"][3]+1)
         return (randx, randy)
+
+"""
+                         /$$          
+                        |__/          
+ /$$$$$$/$$$$   /$$$$$$  /$$ /$$$$$$$ 
+| $$_  $$_  $$ |____  $$| $$| $$__  $$
+| $$ \ $$ \ $$  /$$$$$$$| $$| $$  \ $$
+| $$ | $$ | $$ /$$__  $$| $$| $$  | $$
+| $$ | $$ | $$|  $$$$$$$| $$| $$  | $$
+|__/ |__/ |__/ \_______/|__/|__/  |__/
+                                         
+"""
+
+if __name__ == "__main__":
+    individual = Individual()
