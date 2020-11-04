@@ -12,7 +12,7 @@ class Cellular_Automaton():
     A cellular automaton that will be used to simulate disease spread in a population
     """
     """
-                    /$$           /$$   /$$                          
+                     /$$           /$$   /$$                          
                     |__/          |__/  | $$                          
                     /$$ /$$$$$$$  /$$ /$$$$$$                        
                     | $$| $$__  $$| $$|_  $$_/                        
@@ -29,7 +29,7 @@ class Cellular_Automaton():
         # population variables
         self.population = POPULATION
 
-        self.state_list = [[0] * len(DISEASE_LIST)] * 5
+        self.state_list = [([0] * len(DISEASE_LIST)) for state in range(5)]
 
         # These following two while loops will only place individuals randomly in the grid so as to leave
         #       a border of empty lists around the grid's outside. E.G.
@@ -46,10 +46,10 @@ class Cellular_Automaton():
         # initialize simulation grid indices to be empty lists
         # initialize infectious_count_grid indices to be zero-lists of length equal
         #   to the number of diseases to be modeled in the simulation
-        for a in range(NUM_ROWS_FULL):
-            for b in range(NUM_COLS_FULL):
-                self.sim_grid[a][b] = []
-                self.infectious_count_grid[a][b] = ([0] * len(DISEASE_LIST))
+        for row in range(NUM_ROWS_FULL):
+            for col in range(NUM_COLS_FULL):
+                self.sim_grid[row][col] = []
+                self.infectious_count_grid[row][col] = ([0] * len(DISEASE_LIST))
         print("Initialized main simulation grid")
 
         # create two lists of the population's possible ages and their distribution
@@ -64,11 +64,17 @@ class Cellular_Automaton():
 
         # instantiate the initially infectious individuals and get them placed in the grid
         print("Populating grid with infectious individuals")
-        infectious_count = self.__populate_with_infectious(individual_counter, ages, age_weights)
+        infectious_count, individual_counter = self.__populate_with_infectious(individual_counter, ages, age_weights)
 
         # instantiate the rest of the population (the susceptible individuals) and get them placed in the grid
         print("Populating grid with susceptible individuals")
         self.__populate_with_susceptibles(individual_counter, ages, age_weights, infectious_count)
+
+        # populate `infectious_count_grid`
+        self.__count_num_infectious()
+
+        # outfile for debugging purposes
+        self.outfile = open("population.txt", 'w')
 
         print("Populated main simulation grid with initially infected and susceptible Individuals")
 
@@ -106,7 +112,7 @@ class Cellular_Automaton():
 
                 num_infectious -= 1
                 individual_counter += 1
-        return total_infectious
+        return total_infectious, individual_counter
 
     def __populate_with_susceptibles(self, individual_counter, ages, age_weights, infectious_count):
         """
@@ -134,8 +140,19 @@ class Cellular_Automaton():
         Input:      A row-column tuple identifying a row and column in the simulation grid
         Output:     None
         """
+        # for row in range(0,100):
+        #     for col in range(0,100):
+        #         for disease in self.infectious_count_grid[row][col]:
+        #             if disease:
+        #                 print("There's an infectious in", row, col)
+        # # print(self.infectious_count_grid)
+        # print('\n')
         for row in range(1, ITERATOR_LIMIT):
             for col in range(1, ITERATOR_LIMIT):
+                # for each day, the `self.infectious_count_grid` must be reset to all zeros
+                #   otherwise each spot's infectious count will be incremented upon the previous
+                #   day's count
+                self.infectious_count_grid[row][col] = ([0] * len(DISEASE_LIST))
                 for individual in self.sim_grid[row][col]:
                     for disease in range(len(DISEASE_LIST)):
                         if individual.state_of_health[disease] == 2:
@@ -167,6 +184,9 @@ class Cellular_Automaton():
         Input:          None
         Output:         None
         """
+        # reset the state_list since the simulation recounts the number of susceptibel, latent, etc.
+        #   individuals each simulated day
+        self.state_list = [([0] * len(DISEASE_LIST)) for state in range(5)]
         for row in range(1, ITERATOR_LIMIT):
             for col in range(1, ITERATOR_LIMIT):
                 # traverse the list of individuals "sitting" in this particular grid location
@@ -176,15 +196,34 @@ class Cellular_Automaton():
                     individual.flag_for_update(self.infect((row, col)))
 
         # loop through entire grid again and update all individuals' object variables
+        self.outfile.write("Day: "+str(self.num_days)+'\n')
         for row in range(1, ITERATOR_LIMIT):
             for col in range(1, ITERATOR_LIMIT):
                 x = 0
                 while x < len(self.sim_grid[row][col]):
                     # update the object variables of the individual
+                    self.outfile.write(str(self.sim_grid[row][col][x].id)+" went from "+str(self.sim_grid[row][col][x].state_of_health)+' to ')
                     individual_health = self.sim_grid[row][col][x].apply_changes()
                     if individual_health != -1:
-                        for disease in range(len(DISEASE_LIST)):
-                            self.state_list[individual_health[disease]][disease] += 1
+                        self.outfile.write(str(individual_health)+'\n')
+
+                        # if the individual is susceptible to all diseases. This special case exists because
+                        #   the `susceptible` element in `self.state_list` is a list of len(DISEASE_LIST) size.
+                        #   There is only one pool of susceptibles; there aren't different susceptible pools from
+                        #   which each disease takes. Therefore, each element in the `susceptible` element in 
+                        #   `self.state_list` has the same value
+                        if individual_health == [0]*len(DISEASE_LIST):
+                            # print(self.sim_grid[row][col][x].id, "is perfectly healthy.")
+                            self.state_list[0] = [x + 1 for x in self.state_list[0]]
+                            # print("The new susceptible count is:", self.state_list[0])
+                        # Otherwise, this individual is infected with a disease, so don't increment the `susceptible`
+                        #   element; increment the disease element in each of the states in `self.state_list`
+                        else:
+                            # print(self.sim_grid[row][col][x].id, ": Here's their health:", individual_health)
+                            for disease in range(len(DISEASE_LIST)):
+                                # do not increment the `susceptible` element in `self.state_list`
+                                if individual_health[disease] > 0:
+                                    self.state_list[individual_health[disease]][disease] += 1
                     # if the current position of the individual in the simulation grid doesn't match
                     #   their position in the Individual object (indicating they will move to a different
                     #   spot for the next day), move them to their new position and remove them from the 
@@ -209,15 +248,22 @@ class Cellular_Automaton():
         self.__count_num_infectious()
         self.num_days += 1
 
-        # the simulation when terminate whenever the simulation has run SIM_MAX number of days
+        self.outfile.write('\n')
+
+        # the simulation will terminate whenever it has run SIM_MAX number of days
         #   or there are no individuals in the latent or infectious stages
-        no_latent_infectious = False
+        latent_infectious_present = False
         # loop through all diseases and check if there are any latent or infectious individuals
         #   If there are none, the OR result will be False. If there is at least 1 latent or
-        #   infectious person in the entire simulation, the OR result will be True
+        #   infectious person in the entire simulation, the OR result will be True.
+        # We negate `self.state_list[1][disease]` and `self.state_list[2][disease]` to always return
+        #   False if there are individuals possessing that state
         for disease in range(len(DISEASE_LIST)):
-            no_latent_infectious = no_latent_infectious | self.state_list[1][disease] | self.state_list[2][disease]
-        if self.num_days == SIM_MAX or no_latent_infectious:
+            # latent = self.state_list[1][disease]
+            # infectious = self.state_list[2][disease]
+            # temp = latent_infectious_present
+            latent_infectious_present = latent_infectious_present or self.state_list[1][disease] or self.state_list[2][disease]
+        if self.num_days == SIM_MAX or not latent_infectious_present:
             return True
         return False
 
@@ -230,11 +276,21 @@ class Cellular_Automaton():
         Output:         True if the Individual becomes infected. False otherwise.
         """
         row, col = location
+
         single_cell_sum = 0
         vonNeumann_sum = 0
         moore_sum = 0
         num_infectious_neighbors = []
         is_infected = []
+
+        # unit test: prints the entire neighborhood of a spot
+        for mini_row in range(row-1,row+2):
+            for mini_col in range(col-1,col+2):
+                self.outfile.write('[')
+                for individual in self.sim_grid[mini_row][mini_col]:
+                    self.outfile.write(str(individual.id)+':'+str(individual.state_of_health))
+                self.outfile.write(']')
+            self.outfile.write('\n')
         
         #########################################################################################
         #   THIS PROCESS COULD BE MADE MORE EFFICIENT BY ONLY RUNNING IF THE INDIVIDUAL IS      #
@@ -255,14 +311,14 @@ class Cellular_Automaton():
             single_cell_sum = self.infectious_count_grid[row][col][disease]
             # if using the von Neumann method, sum the number of infectious neighbors in the
             #   north, south, east, and west cells
-            if DISEASE_LIST[disease]["NEIGHBORHOOD"] == 1:
+            if DISEASE_LIST[disease]["NEIGHBORHOOD"] > 0:
                 vonNeumann_sum = self.infectious_count_grid[row][col+1][disease] + \
                     self.infectious_count_grid[row-1][col][disease] + \
                     self.infectious_count_grid[row][col-1][disease] + \
                     self.infectious_count_grid[row+1][col][disease]
 
             # if using the Moore method, add the number of infectious neighbors in the corner cells
-            elif DISEASE_LIST[disease]["NEIGHBORHOOD"] == 2:
+            if DISEASE_LIST[disease]["NEIGHBORHOOD"] == 2:
                 moore_sum = self.infectious_count_grid[row-1][col+1][disease] + \
                     self.infectious_count_grid[row-1][col-1][disease] +\
                     self.infectious_count_grid[row+1][col-1][disease] + \
@@ -272,15 +328,26 @@ class Cellular_Automaton():
             #   based on the neighborhood stategy
             num_infectious_neighbors.append(single_cell_sum + vonNeumann_sum + moore_sum)
 
+        # print("There are", num_infectious_neighbors, "in position", location)
         # someone getting infected is determined by chance based on the number
         #   of infectious individuals in the neighborhood. For N infectious people
         #   in your neighborhood, you have N * TRANS_RATE chance of getting infected
         seed(a=None, version=2)
         # for every disease in the disease list, determine if the individual becomes infected
         for disease in range(len(DISEASE_LIST)):
-            is_infected.append(bool(random() < num_infectious_neighbors[disease]*DISEASE_LIST[disease]["TRANS_RATE"]))
+            random_value = random()
+            chance_infection = num_infectious_neighbors[disease]*DISEASE_LIST[disease]["TRANS_RATE"]
+            self.outfile.write(str(random_value)+'<'+str(chance_infection)+'? | ')
+            is_infected.append(bool(random_value < chance_infection))
+        self.outfile.write('\n')
         # In the end, return a list where each element is a boolean, True if individual becomes
         #   infected, False otherwise
+        # print("is_infected:", is_infected)
+        for disease in range(2):
+            self.outfile.write(str(num_infectious_neighbors[disease])+', ')
+            self.outfile.write(str(is_infected[disease])+', ')
+        self.outfile.write('\n\n')
+        
         return is_infected
 
     # def get_sim_grid(self):

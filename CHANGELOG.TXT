@@ -82,3 +82,8 @@ UPCOMING CHANGES AS OF 2020-10-7
 + Changed parameter file to support the simultaneous simulation of multiple diseases
 + Changed directory tree organization
 + Changed parameter file and its references in project code to reflect changed directory tree
+
+2020-11-04 - version 1.10
+
++ Added multiple disease support
++ Changed cellular automaton from `main.py`'s sequential code to a class, `Cellular_Automaton.py`.

@@ -105,6 +105,11 @@ class Individual:
         # signals the individual has been moved from their previous location
         self.updated = False
 
+        # debug dump
+        self.outfile = open('./debug/'+str(self.id)+'.txt', 'w')
+        self.outfile.write("Latent period: "+str(self.days_in_latent)+'\nInfectious period: '+str(self.days_in_infectious)+'\nImmunity duration: '+str(self.immunity_duration)+'\n\n')
+
+
     """
      /$$$$$$$            /$$       /$$ /$$                 /$$      /$$             /$$     /$$                       /$$                
     | $$__  $$          | $$      | $$|__/                | $$$    /$$$            | $$    | $$                      | $$                
@@ -143,17 +148,17 @@ class Individual:
         """
         for disease in range(len(DISEASE_LIST)):
             # if the individual has become infected as a susceptible, OR
-            #       if they have stayed the duration of the latent period, OR
-            #           if they have stayed the duration of the infectious period, OR
-            #               if they have stayed the duration of the immunity period,
+            #       if they are latent and have stayed the duration of the latent period, OR
+            #           if they are infectious and have stayed the duration of the infectious period, OR
+            #               if they are recovered and have stayed the duration of the immunity period,
             #   set the `self.change` variable to True for them to move to the next stage
             if (self.state_of_health[disease] == 0 and is_infected[disease]) or \
-                    (self.days_in_state[disease] == self.days_in_latent[disease]) or \
-                        (self.days_in_state[disease] == self.days_in_infectious[disease]) or \
-                            self.days_in_state[disease] == self.immunity_duration[disease]:
+                    (self.state_of_health[disease] == 1 and (self.days_in_state[disease] == self.days_in_latent[disease])) or \
+                        (self.state_of_health[disease] == 2 and (self.days_in_state[disease] == self.days_in_infectious[disease])) or \
+                            (self.state_of_health[disease] == 3 and (self.days_in_state[disease] == self.immunity_duration[disease])):
                 self.change[disease] = True
 
-    def apply_changes(self):
+    def apply_changes(self, outfile=None):
         """
         Purpose: updates the state variables of the individual
         Returns: the integer representing the individual's state of health
@@ -162,9 +167,10 @@ class Individual:
             for disease in range(len(DISEASE_LIST)):
                 # transition the individual to the next state
                 if self.change[disease]:
-                    self.days_in_state[disease] = -1
+                    self.days_in_state[disease] = 0
                     self.state_of_health[disease] = (self.state_of_health[disease] + 1) % 4
                     self.change[disease] = False
+                    # print(self.id, "transitioned from", self.state_of_health[disease]-1, "to", self.state_of_health[disease])
             # move the individual to the next spot in the grid by assigning its position
             #       as the first position in the `self.path` list
             if self.path != []:
@@ -178,6 +184,10 @@ class Individual:
                 self.path = terrain_grid.find_shortest_path(self.location, self.tendency)
             # setting a variable `updated` to True prevents this individual from being analyzed again in the same day
             self.updated = True
+            # # unit test that prints the state of health of every individual in the population
+            # outfile.write(str(self.state_of_health)+', ')
+            self.outfile.write("Days in state: "+str(self.days_in_state)+'\n')
+            self.outfile.write("\n\n")
             return self.state_of_health
         return -1
 
@@ -217,6 +227,11 @@ class Individual:
         randx = randint(PATCHES[str(randPatch)]["bounds"][0]+1, PATCHES[str(randPatch)]["bounds"][2]+1)
         randy = randint(PATCHES[str(randPatch)]["bounds"][1]+1, PATCHES[str(randPatch)]["bounds"][3]+1)
         return (randx, randy)
+    
+    def printState(self):
+        print("ID:", self.id)
+        print("State of health:", self.state_of_health)
+        print('\n')
 
 """
                          /$$          

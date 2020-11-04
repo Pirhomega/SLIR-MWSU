@@ -7,7 +7,6 @@
 from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
-from constants import RESOURCES_FOLDER, Grid
 
 # the terrain grid class that we'll use for Individual's pathfinding
 class Obstacle_Grid():
@@ -15,7 +14,7 @@ class Obstacle_Grid():
         # in the end, `self.terrain_grid` will be a 2D array of values where zeros are obstacles
         #       and all values greater than zero are edge weights for all edges connected to that node
         self.terrain_grid = []
-        with open(RESOURCES_FOLDER+"terrain.txt") as input:
+        with open("./resources/terrain.txt") as input:
             rows = input.readlines()
             # loop through entire terrain file and convert all chars to integers
             for row in rows:

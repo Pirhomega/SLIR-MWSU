@@ -2,7 +2,7 @@
     "simulation": {
         "num_row":100,
         "num_col":100,
-        "population":100,
+        "population": 50,
         "age_dist": {
             "17":0.006,
             "19":0.224,
@@ -12,7 +12,7 @@
             "34":0.064,
             "35":0.133
         },
-        "sim_max": 10,
+        "sim_max": 100,
         "patches": {
             "0": {
                 "name": "Dillard Business",
@@ -40,7 +40,7 @@
     "diseases": {
         "0": {
             "name": "COVID-19",
-            "init_infected":30,
+            "init_infected":20,
             "age_dist_disease": {
                 "17":0.00203,
                 "19":0.00203,
@@ -59,14 +59,14 @@
             "separator": 0.99,
             "symptomatic": 0.60,
 
-            "neighborhood": 0,
+            "neighborhood": 2,
             "SLIS": false,
             "immunity_duration_min": 90,
             "immunity_duration_max": 150
         },
         "1": {
             "name": "Influenza",
-            "init_infected":30,
+            "init_infected":20,
             "age_dist_disease": {
                 "17":0.00203,
                 "19":0.00203,
@@ -85,7 +85,7 @@
             "separator": 0.41,
             "symptomatic": 0.60,
 
-            "neighborhood": 0,
+            "neighborhood": 2,
             "SLIS": false,
             "immunity_duration_min": 90,
             "immunity_duration_max": 150

@@ -47,7 +47,7 @@ def main():
         # outputs the beginning-of-day state of the grid to csv output file
         write_to_output(outfile, day, state_list)
 
-        # process the day in the simulation
+        # process for the next day in the simulation
         print("Processing day", day, end='\r', flush=True)
         # process day needs to handle every disease since main does not "know" there
         #       are multiple diseases
@@ -55,10 +55,12 @@ def main():
 
         if MAKE_GIF:
             debug_timer_vis += make_days_image(sim_gif, simulation_grid.sim_grid)
+    # get the state of the simulation for the last day
+    day, state_list = simulation_grid.start_of_day_metrics()
     # output the last day's numbers to csv file
     write_to_output(outfile, day, state_list)
     if MAKE_GIF:
-        finish_visualization(sim_gif, state_list[0], debug_timer_vis)
+        finish_visualization(sim_gif, day, debug_timer_vis)
 
 ####################################################################################
 #                                   FUNCTIONS                                      #
@@ -112,3 +114,10 @@ if __name__ == "__main__":
     main()
     # find the total execution time
     print("Entire simulation took", time() - debug_timer, "seconds")
+
+
+
+# Verified functionality
+#   1. state_list produces the correct count of each disease
+#   2. Infections occur correctly
+#   3. Individuals progress from latent to infectious to recovered correctly

@@ -17,7 +17,7 @@ class Visualizer():
                 root of the number of individuals in the simulation cell.
     """
     """
-                        /$$           /$$   /$$                          
+                     /$$           /$$   /$$                          
                     |__/          |__/  | $$                          
                     /$$ /$$$$$$$  /$$ /$$$$$$                        
                     | $$| $$__  $$| $$|_  $$_/                        
@@ -33,14 +33,14 @@ class Visualizer():
         #       appending each modified image to `images`. `images` starts with a 
         #       defining image that will signifiy the beginning of the gif if looped
         #       infinitely
-        self.canvas = Image.open(RESOURCES_FOLDER+"bkgd.png")
-        self.canvas_ind = Image.open(RESOURCES_FOLDER+"bkgd_ind.png")
+        self.canvas = Image.open(RESOURCES_FOLDER+"images/bkgd.png")
+        self.canvas_ind = Image.open(RESOURCES_FOLDER+"images/bkgd_ind.png")
         # self.images = [Image.open(RESOURCES_FOLDER+"/beginning.png")]
-        self.tiles = [Image.open(RESOURCES_FOLDER+"0.png"),
-                        Image.open(RESOURCES_FOLDER+"1.png"),
-                        Image.open(RESOURCES_FOLDER+"2.png"),
-                        Image.open(RESOURCES_FOLDER+"3.png"),
-                        Image.open(RESOURCES_FOLDER+"4.png")]
+        self.tiles = [Image.open(RESOURCES_FOLDER+"images/0.png"),
+                        Image.open(RESOURCES_FOLDER+"images/1.png"),
+                        Image.open(RESOURCES_FOLDER+"images/2.png"),
+                        Image.open(RESOURCES_FOLDER+"images/3.png"),
+                        Image.open(RESOURCES_FOLDER+"images/4.png")]
         self.image_num = 0
         self.temp_image_folder = OUTPUT_FOLDER+"days/"
         if path.isdir(OUTPUT_FOLDER+"days/"):
@@ -63,12 +63,16 @@ class Visualizer():
         mini_row = 0
         mini_col = 0
         N = ceil(sqrt(max(1, len(DISEASE_LIST))))
-        mini_disease_tile_size = (1 / N) * 250
+        mini_disease_tile_size = int((1 / N) * 250)
         copy_canvas_ind = self.canvas_ind.copy()
         for row in range(N):
             for col in range(N):
+                # remember, `state_of_health` is a list with the individual's state of health for
+                #   all simulated diseases. For every disease in the individual's state_of_health,
+                #   paste the equivalent tile (0.png, 1.png, etc.) to a canvas tile. After all diseases
+                #   have been pasted, return the canvas tile to the caller.
                 for disease in range(len(DISEASE_LIST)):
-                    tile = self.tiles[state_of_health].resize((mini_disease_tile_size, mini_disease_tile_size))
+                    tile = self.tiles[state_of_health[disease]].resize((mini_disease_tile_size, mini_disease_tile_size))
                     # if we've filled a row inside the cell, jump to the beginning of the next row
                     if mini_col == N:
                         mini_row += 1
@@ -119,9 +123,10 @@ class Visualizer():
                 # within each cell of the simulation grid there will be rows and cols
                 mini_row = 0
                 mini_col = 0
-                # for each individual in this cell, paste the correct tile in
+                # for each individual in this cell, generate a tile representing the individual's
+                #   state of health for all modeled diseases
                 for individual in sim_grid[row][col]:
-                    tile = self.__generate_tile(individual.state_of_health, mini_tile_size)
+                    tile = self.__generate_tile(individual.state_of_health)
                     # if we've filled a row inside the cell, jump to the beginning of the next row
                     if mini_col == N:
                         mini_row += 1
@@ -132,16 +137,19 @@ class Visualizer():
                             (row-1)*default_tile_size + (mini_tile_size*mini_row)))
                     mini_col += 1
         # save the changes made to the image
-        canvas_copy.save(OUTPUT_FOLDER+"/days/"+str(self.image_num)+".png", quality=95)
+        canvas_copy.save(OUTPUT_FOLDER+"days/"+str(self.image_num)+".png", quality=95)
         self.image_num += 1
 
     def finish_and_save_gif(self, num_days):
         # save the list of simulation images as a gif
-        with get_writer(OUTPUT_FOLDER+'/simulation.gif', mode='I') as writer:
-            image = imread(RESOURCES_FOLDER+'/beginning.png')
+        with get_writer(OUTPUT_FOLDER+'simulation.gif', mode='I') as writer:
+            image = imread(RESOURCES_FOLDER+'images/beginning.png')
             writer.append_data(image)
             for filename in range(num_days):
                 image = imread(self.temp_image_folder+str(filename)+'.png')
                 writer.append_data(image)
                 print("Processed day", filename, end='\r', flush=True)
         rmtree(self.temp_image_folder)
+
+if __name__ == "__main__":
+    Visualize = Visualizer()
