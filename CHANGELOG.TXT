@@ -87,3 +87,7 @@ UPCOMING CHANGES AS OF 2020-10-7
 
 + Added multiple disease support
 + Changed cellular automaton from `main.py`'s sequential code to a class, `Cellular_Automaton.py`.
+
+2020-11-04 - version 1.11
+
++ Fixed visualization error that would not display the individual's state of health for all modeled diseases
