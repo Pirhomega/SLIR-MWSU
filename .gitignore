@@ -2,4 +2,8 @@
 tempMulti/
 *.pdf
 *.docx
+days/
+simulation.gif
 __pycache__/
+debug/
+population.txt

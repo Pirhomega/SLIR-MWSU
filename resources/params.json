@@ -2,7 +2,7 @@
     "simulation": {
         "num_row":100,
         "num_col":100,
-        "population":5,
+        "population": 50,
         "age_dist": {
             "17":0.006,
             "19":0.224,
@@ -12,10 +12,7 @@
             "34":0.064,
             "35":0.133
         },
-        "max_exposure": 1,
-        "mask_wearer": 0.9,
-        "separator": 0.99,
-        "sim_max": 1000,
+        "sim_max": 100,
         "patches": {
             "0": {
                 "name": "Dillard Business",
@@ -28,7 +25,7 @@
                 "exits": [36, 75, 36, 76]
             },
             "2": {
-                "name": "Mccoy College",
+                "name": "McCoy College",
                 "bounds": [48, 5, 58, 30],
                 "exits": [52, 5, 53, 5]
             },
@@ -37,31 +34,63 @@
                 "bounds": [82, 44, 95, 76],
                 "exits": [82, 59, 82, 60, 95, 59, 95, 60]
             }
+        },
+        "visualize": false
+    },
+    "diseases": {
+        "0": {
+            "name": "COVID-19",
+            "init_infected":20,
+            "age_dist_disease": {
+                "17":0.00203,
+                "19":0.00203,
+                "21":0.00203,
+                "24":0.00203,
+                "29":0.0274,
+                "34":0.0274,
+                "35":0.0274
+            },
+            "latent_period_min":10,
+            "latent_period_max":15,
+            "infectious_period_min":10,
+            "infectious_period_max":15,
+            "transmission_rate": 0.0325,
+            "mask_wearer": 0.9,
+            "separator": 0.99,
+            "symptomatic": 0.60,
+
+            "neighborhood": 2,
+            "SLIS": false,
+            "immunity_duration_min": 90,
+            "immunity_duration_max": 150
+        },
+        "1": {
+            "name": "Influenza",
+            "init_infected":20,
+            "age_dist_disease": {
+                "17":0.00203,
+                "19":0.00203,
+                "21":0.00203,
+                "24":0.00203,
+                "29":0.0274,
+                "34":0.0274,
+                "35":0.0274
+            },
+            "latent_period_min":10,
+            "latent_period_max":15,
+            "infectious_period_min":10,
+            "infectious_period_max":15,
+            "transmission_rate": 0.0325,
+            "mask_wearer": 0.0,
+            "separator": 0.41,
+            "symptomatic": 0.60,
+
+            "neighborhood": 2,
+            "SLIS": false,
+            "immunity_duration_min": 90,
+            "immunity_duration_max": 150
         }
     },
-    "0": {
-        "init_infected":1,
-        "age_dist_disease": {
-            "17":0.00203,
-            "19":0.00203,
-            "21":0.00203,
-            "24":0.00203,
-            "29":0.0274,
-            "34":0.0274,
-            "35":0.0274
-        },
-        "latent_period_min":10,
-        "latent_period_max":15,
-        "infectious_period_min":10,
-        "infectious_period_max":15,
-        "symptomatic": 0.60,
-
-        "vonNeumann": true,
-        "SLIS": false,
-        "immunity_duration_min": 90,
-        "immunity_duration_max": 150
-    },
     "resources":"./resources/",
-    "output":"./source/output/",
-    "visualize": false
+    "output":"./output/"
 }
