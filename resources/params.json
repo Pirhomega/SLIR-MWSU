@@ -2,7 +2,7 @@
     "simulation": {
         "num_row":100,
         "num_col":100,
-        "population": 50,
+        "population": 500,
         "age_dist": {
             "17":0.006,
             "19":0.224,
@@ -12,7 +12,7 @@
             "34":0.064,
             "35":0.133
         },
-        "sim_max": 100,
+        "sim_max": 1000,
         "patches": {
             "0": {
                 "name": "Dillard Business",
@@ -35,7 +35,7 @@
                 "exits": [82, 59, 82, 60, 95, 59, 95, 60]
             }
         },
-        "visualize": false
+        "visualize": true
     },
     "diseases": {
         "0": {
