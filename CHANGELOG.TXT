@@ -91,3 +91,12 @@ UPCOMING CHANGES AS OF 2020-10-7
 2020-11-04 - version 1.11
 
 + Fixed visualization error that would not display the individual's state of health for all modeled diseases
+
+2020-11-06 - version 1.12
+
++ Added terrain generation
+    + User can create an N x N grid and mark patches and exits through pygame
+    + Patches and exits are converted to 1s and 0s and written to a .txt file
+    + Patch bounds are automatically recorded in `sim_params.json`
+    + User can undo/redo drawn/undid patches and exits using keybinds
++ Added patch and exit visual as the background of the visualization gif, `simulation.gif`
