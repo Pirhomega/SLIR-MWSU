@@ -190,32 +190,6 @@ class Individual:
             self.outfile.write("\n\n")
             return self.state_of_health
         return -1
-
-    def select_new_location(self, spot):
-        """
-        Purpose:    Moves the individual in the simulation grid
-        Input:      `spot`: 
-        """
-        can_move = False
-        for disease in range(len(DISEASE_LIST)):
-            # the individual can move if they are not recovered OR if they are recovered but still alive
-            if (self.state_of_health[disease] != 3) or (self.state_of_health[disease] == 3 and not self.die_when_recovered[disease]):
-                can_move = True
-
-        if can_move:
-            new_spot_row = spot[0]
-            new_spot_col = spot[1]
-            drow = spot[0] - self.tendency[0]
-            dcol = spot[1] - self.tendency[1]
-            if drow < 0:
-                new_spot_row = spot[0] + 1
-            elif drow > 0:
-                new_spot_row = spot[0] - 1
-            if dcol < 0:
-                new_spot_col = spot[1] + 1
-            elif dcol > 0:
-                new_spot_col = spot[1] - 1
-            self.location = (new_spot_row, new_spot_col)
     
     def chooseLocation(self):
         """

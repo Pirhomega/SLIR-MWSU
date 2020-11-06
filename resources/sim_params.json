@@ -1,0 +1,119 @@
+{
+  "simulation": {
+    "num_row": 100,
+    "num_col": 100,
+    "population": 100,
+    "age_dist": {
+      "17": 0.006,
+      "19": 0.224,
+      "21": 0.24,
+      "24": 0.213,
+      "29": 0.121,
+      "34": 0.064,
+      "35": 0.133
+    },
+    "sim_max": 1000,
+    "patches": {
+      "0": {
+        "name": "",
+        "bounds": [
+          7,
+          6,
+          29,
+          29
+        ]
+      },
+      "1": {
+        "name": "",
+        "bounds": [
+          43,
+          6,
+          63,
+          29
+        ]
+      },
+      "2": {
+        "name": "",
+        "bounds": [
+          74,
+          6,
+          94,
+          29
+        ]
+      },
+      "3": {
+        "name": "",
+        "bounds": [
+          29,
+          41,
+          43,
+          91
+        ]
+      },
+      "4": {
+        "name": "",
+        "bounds": [
+          63,
+          41,
+          74,
+          91
+        ]
+      }
+    },
+    "visualize": true
+  },
+  "diseases": {
+    "0": {
+      "name": "COVID-19",
+      "init_infected": 20,
+      "age_dist_disease": {
+        "17": 0.00203,
+        "19": 0.00203,
+        "21": 0.00203,
+        "24": 0.00203,
+        "29": 0.0274,
+        "34": 0.0274,
+        "35": 0.0274
+      },
+      "latent_period_min": 10,
+      "latent_period_max": 15,
+      "infectious_period_min": 10,
+      "infectious_period_max": 15,
+      "transmission_rate": 0.0325,
+      "mask_wearer": 0.9,
+      "separator": 0.99,
+      "symptomatic": 0.6,
+      "neighborhood": 2,
+      "SLIS": false,
+      "immunity_duration_min": 90,
+      "immunity_duration_max": 150
+    },
+    "1": {
+      "name": "Influenza",
+      "init_infected": 20,
+      "age_dist_disease": {
+        "17": 0.00203,
+        "19": 0.00203,
+        "21": 0.00203,
+        "24": 0.00203,
+        "29": 0.0274,
+        "34": 0.0274,
+        "35": 0.0274
+      },
+      "latent_period_min": 10,
+      "latent_period_max": 15,
+      "infectious_period_min": 10,
+      "infectious_period_max": 15,
+      "transmission_rate": 0.0325,
+      "mask_wearer": 0.0,
+      "separator": 0.41,
+      "symptomatic": 0.6,
+      "neighborhood": 2,
+      "SLIS": false,
+      "immunity_duration_min": 90,
+      "immunity_duration_max": 150
+    }
+  },
+  "resources": "./resources/",
+  "output": "./output/"
+}

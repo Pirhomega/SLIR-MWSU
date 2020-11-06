@@ -33,7 +33,7 @@ class Visualizer():
         #       appending each modified image to `images`. `images` starts with a 
         #       defining image that will signifiy the beginning of the gif if looped
         #       infinitely
-        self.canvas = Image.open(RESOURCES_FOLDER+"images/bkgd.png")
+        self.canvas = Image.open(RESOURCES_FOLDER+"images/bkgd.png").resize((4998,4998))
         self.canvas_ind = Image.open(RESOURCES_FOLDER+"images/bkgd_ind.png")
         self.tiles = [Image.open(RESOURCES_FOLDER+"images/0.png"),
                         Image.open(RESOURCES_FOLDER+"images/1.png"),
